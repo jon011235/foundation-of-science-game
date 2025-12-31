@@ -355,7 +355,7 @@ class Spherical(Level):
 class NonUniqueODE(Level):
     """
     The world is a one-dimensional curve embedded in a 2d plane.  The curve is a solution of the ODE:
-    $ dy/dx = 2 * |x|^(1/2) $
+    $ dy/dx = 2 * |y|^(1/2) $
     with the initial condition y(0) = 0.
 
     Besides the trivial solution y(x) = 0, there is an infinite family of solutions, of the form:
@@ -403,9 +403,9 @@ class NonUniqueODE(Level):
         self.known_points = {}
     
     def description(self):
-        return """In this level, the `model` takes only a 1-dimensional position, and outputs a scalar. Your task is to find the universal law governing this space.
+        return """In this level, the `model` takes only a 1-dimensional position, representing the y coordinate, and outputs a scalar. Your task is to find the universal law governing this space.
 
-`model` should have type model(position: float) -> float
+`model` should have type model(y: float) -> float
 
 HINT: restart the world, see what changes, and what doesn't!"""
 
@@ -430,8 +430,8 @@ HINT: restart the world, see what changes, and what doesn't!"""
 
     def check(self, model):
         for i in range(100):
-            pos = np.random.randint(-50, 50, 1)
-            sol = 2 * np.sqrt(np.abs(pos))
-            if not math.isclose(model(pos), sol):
+            y = np.random.randint(-50, 50, 1)
+            sol = 2 * np.sqrt(np.abs(y))
+            if not math.isclose(model(y), sol):
                 return False
         return True
