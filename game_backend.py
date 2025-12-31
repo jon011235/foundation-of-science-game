@@ -29,6 +29,9 @@ class Level():
 
     def __init__(self):
         raise NotImplemented
+
+    def restart(self):
+        raise Exception("This level cannot be restarted")
     
     def description(self): # prints a description of the level,
         # in particular how many dimensions and how the context of the model looks like
