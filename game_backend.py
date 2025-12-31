@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 
 # from https://stackoverflow.com/questions/2827393/angles-between-two-n-dimensional-vectors-in-python
 def unit_vector(vector):
@@ -347,5 +348,90 @@ class Spherical(Level):
             if not np.isclose(out_theta % (2*np.pi), expected[0] % (2*np.pi), atol=1e-5):
                 return False
             if not np.isclose(out_phi, expected[1], atol=1e-5):
+                return False
+        return True
+
+
+class NonUniqueODE(Level):
+    """
+    The world is a one-dimensional curve embedded in a 2d plane.  The curve is a solution of the ODE:
+    $ dy/dx = 2 * |x|^(1/2) $
+    with the initial condition y(0) = 0.
+
+    Besides the trivial solution y(x) = 0, there is an infinite family of solutions, of the form:
+    $
+        y(x) =
+            -(x - A)^2  , if x < A
+            0           , if A <= x <= B
+            (x - B)^2   , if x > B
+    $
+    where A, B are constant with A <= 0 <= B.
+    Desmos graph: https://www.desmos.com/calculator/b0hbytghwr
+
+    The goal is to showcase _inter-uiverse non-determinism_ (and not intra-universe). A and B are magic constants that change the "shape" of the world (in a predictable, deterministic way), but they nonetheless can be random.
+
+    The ideal scenario would be: player restarts the world a few times, maybe saves points along the curve and plots them. Then notices the shape always looks similar and (maybe?) takes the derivative.
+
+    Attributes
+    ----------
+    x : float
+        The coordinate along the x-axis of the 2d plane. The `position` is always np.array([x, y(x)])
+    A : int
+        Lower constant describing the curve
+    B : int
+        Upper constant describing the curve
+
+    Methods
+    -------
+    y() -> float
+        Computes the y coordinate, for the current `x`
+    """
+
+    def __init__(self):
+        self.dim = 2
+        self.dim_move = 1
+        self.x = 0.0 # position
+        self.A = -2
+        self.B = 1
+        self.position = np.array([self.x, self.y()])
+
+    def restart(self):
+        self.A = np.random.randint(-10, 0)
+        self.B = np.random.randint(0, 10)
+        self.x = 0.0
+        self.position = np.array([self.x, self.y()])
+        self.known_points = {}
+    
+    def description(self):
+        return """In this level, the `model` takes only a 1-dimensional position, and outputs a scalar. Your task is to find the universal law governing this space.
+
+`model` should have type model(position: float) -> float
+
+HINT: restart the world, see what changes, and what doesn't!"""
+
+    def y(self):
+        if self.x < self.A: return -(self.x - self.A)**2
+        elif self.x > self.B: return (self.x - self.B)**2
+        else: return 0
+    
+    def move(self, movement_vector: np.array):
+        assert(len(movement_vector) == 1)
+        self.x += movement_vector[0]
+        self.position = np.array([self.x, self.y()])
+    
+    def save_point(self, name: str):
+        self.known_points[name] = self.position.copy()
+
+    def measure_angle(self, left_point: str, right_point: str) -> int:
+        raise Exception("you do not need to measure angles to complete this level")
+
+    def measure_length(self, other_point) -> int:
+        raise Exception("you do not need to measure lengths to complete this level")
+
+    def check(self, model):
+        for i in range(100):
+            pos = np.random.randint(-50, 50, 1)
+            sol = 2 * np.sqrt(np.abs(pos))
+            if not math.isclose(model(pos), sol):
                 return False
         return True
