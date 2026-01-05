@@ -59,7 +59,7 @@ class Euclidean(Level):
         
         so model should have type model(position: List(int), movement: List(int)) -> List(int) where every list is dim long"""
     
-    def move(self, movement_vector: np.array):
+    def move(self, movement_vector: np.ndarray):
         self.position += movement_vector
     
     def save_point(self, name: str):
@@ -83,9 +83,9 @@ class Euclidean(Level):
 
 
 class Elevator(Euclidean):
-    dim_move = 2
     def __init__(self):
         super().__init__()
+        self.dim_move = 2
         self.known_points["check me out"] = np.array([1,2,0])
     
     def description(self):
@@ -95,7 +95,7 @@ class Elevator(Euclidean):
         
         so model should have type model(position: List(int), movement: List(int)) -> List(int)"""
     
-    def move(self, movement_vector: np.array):
+    def move(self, movement_vector: np.ndarray):
         self.position += np.append(movement_vector, 0)
         if np.all(self.position == self.known_points["check me out"]):
             self.position += np.array([0,0,1])
@@ -147,9 +147,9 @@ class Elevator(Euclidean):
       
 
 class SimpleTime(Euclidean):
-    dim_move = 2
     def __init__(self):
         super().__init__()
+        self.dim_move = 2
     
     def description(self):
         return """This level takes 2 dimensions as a movementvector and
@@ -158,7 +158,7 @@ class SimpleTime(Euclidean):
         
         so model should have type model(position: List(int), movement: List(int)) -> List(int)"""
     
-    def move(self, movement_vector: np.array):
+    def move(self, movement_vector: np.ndarray):
         self.position += np.append(movement_vector, round(np.sqrt(movement_vector[0]**2+movement_vector[1]**2)))
     
     def check(self, model):
@@ -195,7 +195,7 @@ class Spherical(Level):
     works with 3‑dimensional spherical coordinates (θ, φ, r) internally, but the
     description does **not** reveal the geometry.
     """
-    position = [0,0]
+    position = [0.0,0.0]
 
     # ------------------------------------------------------------------ #
     # Construction – fixed to a 3‑D sphere (dim = 3)
@@ -207,7 +207,7 @@ class Spherical(Level):
 
         # start at (θ=0, φ=π/2) → point on the equator, x = r
         self.position[0] = 0.0                 # azimuth  ∈ [0, 2π)
-        self.position[1] = np.pi / 2.0           # polar    ∈ [0, π]
+        self.position[1] = np.pi / 2.0         # polar    ∈ [0, π]
 
         self.known_points = {}
 
@@ -240,10 +240,8 @@ class Spherical(Level):
     # Public API required by the framework
     # ------------------------------------------------------------------ #
     def description(self):
-        return (
-            "This level takes a 3‑dimensional position and a 2‑dimensional movement "
-            "vector, updates the position, and lets you save/measure points."
-        )
+        return """This level takes a 3‑dimensional position and a 2‑dimensional movement
+vector, updates the position, and lets you save/measure points."""
 
     def move(self, movement_coords: np.ndarray):
         """

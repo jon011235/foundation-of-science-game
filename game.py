@@ -31,5 +31,5 @@ cli.start()
 
 # Sphere
 print("The ancient Greeks had a lot of nice geometry, but let's try something newer")
-cli = CLI(Spherical)
+cli = CLI(Spherical())
 cli.start()
