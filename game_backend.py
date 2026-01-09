@@ -348,6 +348,7 @@ import random
 
 class EverythingRandom(Level):
     def __init__(self):
+        self.dim = 2
         super().__init__()
         random.seed(749698524)
     """ the seed was derived by this heavenly brute force, which did not run to its success
@@ -400,6 +401,7 @@ class NObservation(Euclidean):
     observations = [(random.randint(0,100), random.randint(0,100)) for i in range(5000)]
 
     def __init__(self):
+        self.dim = 2
         super().__init__()
 
     def observe(self):
@@ -422,7 +424,7 @@ class NObservation(Euclidean):
         if not super.check(model_curried):
             return False
         
-        for i in range(100)
+        for i in range(100):
             p = [random.randint(0, 150) for i in range(2)]
             if (p in self.observations) != model(p, [0,0], self.observations):
                 return False
@@ -433,6 +435,7 @@ class Observation(NObservation):
     observations = []
 
     def __init__(self):
+        self.dim = 2
         super().__init__()
         
     
@@ -454,7 +457,7 @@ class Observation(NObservation):
         if magic == 0:
             self.observations.append(self.position)
             return True
-        else False
+        else: return False
     
     def check(self, model):
         def model_curried(a, b):
@@ -468,7 +471,7 @@ class Observation(NObservation):
         # Test no obervations there before
         # Test observations are persistent
 
-        for i in range(100)
+        for i in range(100):
             p = [random.randint(0, 150) for i in range(2)]
             if (p in self.observations) != model(p, [0,0], self.observations):
                 return False
