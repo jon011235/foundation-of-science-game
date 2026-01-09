@@ -1,5 +1,31 @@
-# Ideas for the future
+# Some thoughts and Ideas for the future
+## Marimo features
 
+[ ] editor to submit either code or equations. When clicking check button sends this to our python code
+[ ] interactive plot together with a REPL to move in the level
+    [ ] ability to reset level. Graph stays but now plots in different color
+    [ ] ability to reset plot
+    [ ] bonus feature: pagination to switch between different graphs and REPLs that are in different states
+    [ ] bonus feature: little editor to execute automated routine with the level
+[ ] formatted Introduction to the Level including specification of what to submit
+[ ] Introduction what requesites are needed to play this game and where to find docu i.e. for numpy
+[ ] After solving level information on what exactly was going on and link to external sourceWrite me a proof of concept, that is easy to understand and extend which does the following:
+
+What I want to do is to run python in WASM and use z3. Just write a simple demo
+
+One way to do this is to use the z3-solver npm package and piodide and let the python interact with the js bindings. If you have a more direct/more elegant approach please use that
+
+Take care to have an easy to use development setup as well as a ready to use CI pipeline compatible with github pages
+[ ] Last: Level overview, unlocking of levels (cookies?) and fluff
+
+
+
+
+
+
+
+
+# Old (from before the meeting with Andrei)
 ## Audience?
 - Should be playable on its own and possibly self explanatory
 - Base levels should basically be open to anyone with some programming experience -> indication for rising requirements (i.e. geometry series)
@@ -48,3 +74,6 @@ Here we should commit on a list of things that level can and can't do so that we
 
 ### level workings
 Should they use floats internally? Can we unify levels more?
+
+
+
