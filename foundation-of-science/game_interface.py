@@ -43,7 +43,12 @@ def _(mo):
         exec(code, module.__dict__)
         return module
 
-    gb = _load_module_from_url("gb", "/marimo/game_backend.py")
+    # Hack to make it work both locally and on github pages
+    base_url = "/marimo/game_backend.py"
+    try:
+        gb = _load_module_from_url("gb", "/foundation-of-science-game/"+base_url)
+    except:
+        gb = _load_module_from_url("gb", base_url)
 
     url_params = mo.query_params()
 

@@ -32,6 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v5
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -46,7 +47,7 @@ jobs:
       - name: Install Python dependencies
         run: pip install marimo
       - name: Build with Jekyll
-        run: bundle exec jekyll build
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
       - name: Export marimo UI and copy backend
         run: |
           marimo export html-wasm game_interface.py -o _site/marimo/game_interface.html --mode run -f
