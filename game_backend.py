@@ -34,6 +34,10 @@ class Level():
         # in particular how many dimensions and how the context of the model looks like
         raise NotImplemented
 
+    def solution_description(self):
+        # should include the relevant things to notice and model in this level
+        raise NotImplemented
+
     def move(self, movement_vector):
         raise NotImplemented
 
@@ -87,58 +91,77 @@ class Elevator(Euclidean):
         super().__init__()
         self.dim_move = 2
         self.known_points["check me out"] = np.array([1,2,0])
-    
+
     def description(self):
-        return """This level takes 2 dimensions as a movementvector and
-        expects the model to take a 3 dimensional position and a 2 dimensional movement_vector
-        it should return a 3 dimensional list with the predicted new position
-        
-        so model should have type model(position: List(int), movement: List(int)) -> List(int)"""
+        return """In this level, positions are represented by 3-dimensional lists, while the movement vector by a 2-dimensional list. Given the current position and a movement vector, you need to predict the next position.
     
+        `model` should have type `model(position: List(int), movement: List(int)) -> List(int)`"""
+
+    def solution_description(self):
+        return """The world seems to consist of a simple 2-dimensional plane, until you travel to `[1, 2, 0]`. Here, you get "teleported" to the parallel plane `z = 1`.
+
+A possible solution is:
+```py
+def model(position, movement):
+    for i in range(2):
+        position[i] += movement[i]
+    if position[0] == 1 and position[1] == 2:
+        position[2] = 1 - position[2]
+    return position
+```
+
+You could think of `[1, 2, 0]` as a [wormhole](https://en.wikipedia.org/wiki/Wormhole), a hypothetical structure that connects seemingly desperate points in space. Fascinating about wormholes is that the mathematical framework of general relativity _allows for their existence_. Does this imply that they exist? Or that they could?
+
+It has been pointed out that maths is [unreasonably effective](https://en.wikipedia.org/wiki/The_Unreasonable_Effectiveness_of_Mathematics_in_the_Natural_Sciences) at modelling the natural word. And indeed, when we try to model simple physics experiments, we often reach mathematical descriptions that apply to a large class of phenomena. Is there underlying truth to these models? Should we expect that mathematical possibilities in our models will translate to (yet-unobserved) physical phenomena?
+
+Or should we always be careful not to mistake the map for the mountain? That is, (mathematical) models are useful as "maps" in as much as they predict how the world functions (i.e. show us the way through the mountains). But we should put little trust in maps of uncharted territories. Even if an elegant mathematical theory predicts some theoretical outcomes, should we only trust in it once we observe it empirically?"""
+
     def move(self, movement_vector: np.ndarray):
         self.position += np.append(movement_vector, 0)
         if np.all(self.position == self.known_points["check me out"]):
             self.position += np.array([0,0,1])
         elif list(self.position) == list(self.known_points["check me out"]+np.array([0,0,1])):
             self.position -= np.array([0,0,1])
-    
+
     def check(self, model):
         save_position = self.position
 
         for i in range(100):
             pos = np.random.randint(-1000, 1000, 3)
+            pos[2] = np.random.randint(0,2)
             self.position = pos.copy()
             move = np.random.randint(-1000, 1000, 2)
             self.move(move)
             if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
                 self.position = save_position
                 return False
-        
-        for i in range(30):
+    
+        for i in range(100):
             pos = np.random.randint(-10, 10, 3)
+            pos[2] = np.random.randint(0,2)
             self.position = pos.copy()
             move = np.random.randint(-10, 10, 2)
             self.move(move)
             if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
                 self.position = save_position
                 return False
-        
+    
         pos = [30, 20, 1]
         self.position = pos.copy()
-        move = [-29, -28]
+        move = [-29, -18]
         self.move(move)
         if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
             self.position = save_position
             return False
-        
+    
         pos = [30, 20, 0]
         self.position = pos.copy()
-        move = [-29, -28]
+        move = [-29, -18]
         self.move(move)
         if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
             self.position = save_position
             return False
-        
+    
         # TODO can not test position at "check me out" and move 0 as this is not testable for user
         # TODO wrong, they can stand still on that spot, but maybe hard to guess
 
