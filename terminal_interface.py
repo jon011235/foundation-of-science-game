@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 # local import
 import game_backend as gb
+import smt_backend as smtb
 
 def load_model_from_path(path):
     path = os.path.expanduser(path)
@@ -196,6 +197,32 @@ class CLI:
             return
         print("model check result:", ok)
         self.success = ok
+
+    def cmd_checksmt(self, args):
+        if not isinstance(self.level, smtb.SMTLevelWrapper):
+            print("error running SMT check: this level does not support SMT checking")
+        if not args:
+            print("usage: checksmt PATH_TO_MODEL_PY")
+            return
+        path = args[0]
+        model_func = load_model_from_path(path)
+        if model_func is None:
+            return
+        try:
+            cntex = self.level.find_counterexample(model_func)
+        except Exception as e:
+            print("error running check:", e)
+            return
+        if cntex is None:
+            print("model check result: True")
+            self.success = True
+        else:
+            print("model check result: False")
+            # TODO: pretty print `cntex` for extra hint
+            # print(cntex)
+            self.success = False
+
+
 
 if __name__ == "__main__":
     cli = CLI(gb.Euclidean())

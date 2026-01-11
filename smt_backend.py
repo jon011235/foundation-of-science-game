@@ -15,7 +15,7 @@ class SMTLevelWrapper:
         """Delegate all other method calls to the wrapped level."""
         return getattr(self.level, name)
     
-    def validate_with_smt(self, make_model):
+    def find_counterexample(self, make_model, use_ints = False):
         """
         Validates a model using SMT solver Z3.
         
@@ -25,16 +25,28 @@ class SMTLevelWrapper:
                        pos_vars and mov_vars are lists of Z3 Int variables.
         
         Returns:
-            True if the model is valid for all inputs, False otherwise (with counterexample).
+            None if the user & expected models are the same. Otherwise, a dict with a counterexample:
+            ```py
+            {
+                'pos': {0: 1, 1: 0, 2: 1},  # indicating the initial position (1, 0, 1)
+                'mov': {0: 0, 1: 2},
+                'exp': {0: 1, 1: 2, 2: 0},
+                'out': {0: 1, 1: 2, 2: 9},
+            }
+            ```
         """
         s = Solver()
         
         # Create SMT variables based on level dimensions
-        pos_vars = [Int(f'pos_{i}') for i in range(self.level.dim)]
-        mov_vars = [Int(f'mov_{i}') for i in range(self.level.dim_move)]
-        expected_vars = [Int(f'expected_{i}') for i in range(self.level.dim)]
+        var_type = Real if not use_ints else Int
+        pos_vars = [var_type(f'pos_{i}') for i in range(self.level.dim)]
+        mov_vars = [var_type(f'mov_{i}') for i in range(self.level.dim_move)]
+        expected_vars = [var_type(f'exp_{i}') for i in range(self.level.dim)]
+
+        # Add the expected behavior constraint
+        self._get_expected_formula(s, pos_vars, mov_vars, expected_vars)
         
-        # Get model's output variables
+        # Get user model's formulas for output variables
         try:
             out_formulas = make_model(pos_vars, mov_vars)
             if len(out_formulas) != self.level.dim:
@@ -44,43 +56,42 @@ class SMTLevelWrapper:
             print(f"Error calling make_model: {e}")
             return False
 
-        out_vars = [Int(f'out_{i}') for i in range(self.level.dim)]
+        # Add dummy variables for user model's output formulas 
+        out_vars = [var_type(f'out_{i}') for i in range(self.level.dim)]
         for (var, formula) in zip(out_vars, out_formulas):
             s.add(var == formula)
-
-
-        # Add the expected behavior constraint
-        self._get_expected_formula(s, pos_vars, mov_vars, expected_vars)
         
+        # Constrain model to find values where at least one expected/output pair is different
         diff_out = [out_var != exp_var for (out_var, exp_var) in zip(out_vars, expected_vars)]
         s.add(Or(diff_out))
 
-        # s.add(pos_vars[0] == 0)
-        # s.add(pos_vars[1] == 0)
-        # s.add(pos_vars[2] == 0)
-        # s.add(mov_vars[0] == 1)
-        # s.add(mov_vars[1] == 2)
-        # print(s)
-        # print(s.check())
-        # print(s.model())
-        # print(s.consequences([pos_vars[0] == 1, pos_vars[1] == 2, pos_vars[2] == 0], [expected_vars[0]]))
-        
+
         # Try to find a counterexample
         if s.check() == sat:
             model = s.model()
-            print("Counterexample found:")
-            print(f"  Position: {[model[v] for v in pos_vars]}")
-            print(f"  Movement: {[model[v] for v in mov_vars]}")
-            print(f"  Expected: {[model[v] for v in expected_vars]}")
-            print(f"  Got: {[model[v] for v in out_vars]}")
-            return False
+            counter = {}
+
+            # help function (get {id} from string of type "pos_{id}")
+            def var_to_id(var, prefix_len = 4): return int((var.__str__())[prefix_len:])
+
+            for (name, vars) in [("pos", pos_vars), ("mov", mov_vars), ("exp", expected_vars), ("out", out_vars)]:
+                counter[name] = dict([(var_to_id(v), model[v]) for v in vars])
+
+            return counter
         
-        return True
+        return None
     
     def _get_expected_formula(self, s: Solver, pos_vars, mov_vars, expected_vars):
         """
-        Returns the expected output as Z3 formulas based on level type.
-        Override this per level subclass for custom behavior.
+        Adds level-specific constraints to solver:
+            - constraints relating initial coordinates & movement vector to expected output coordinates
+            - constraints on the initial coordinates & movement vector (e.g. initial position can only take certain values in certain dimensions)
+
+        Args:
+            s: z3 solver
+            pos_vars: z3 variables for initial coordinates (list of length level.dim)
+            mov_vars: z3 variables for movement vector (list of length level.dim_move)
+            expected_vars: z3 variables for expected output coordinates (list of length level.dim)
         """
         raise NotImplemented
 
@@ -103,46 +114,12 @@ class ElevatorSMTWrapper(SMTLevelWrapper):
         super(ElevatorSMTWrapper, self).__init__(Elevator())
     
     def _get_expected_formula(self, s, pos_vars, mov_vars, expected_vars):
-        s.add(Or([ pos_vars[2] == 1, pos_vars[2] == 0]))
+        s.add(Or(pos_vars[2] == 0, pos_vars[2] == 1))
 
-        # Move in x, y with no z change, then apply elevator logic
         new_x = pos_vars[0] + mov_vars[0]
         new_y = pos_vars[1] + mov_vars[1]
-        old_z = pos_vars[2]
 
-        s.add(expected_vars[0] == new_x)
-        s.add(expected_vars[1] == new_y)
-        
-        # Elevator at [1, 2, 0] lifts to [1, 2, 1]
-        at_elevator = And(new_x == 1, new_y == 2)
-        at_elevator_lower = And(at_elevator, old_z == 0)
-        
-        # Apply elevator logic: if at [1,2,0] go to [1,2,1], else if at [1,2,1] go to [1,2,0]
-        final_z = If(at_elevator_lower, 1, If(at_elevator, 0, old_z))
+        at_elevator_pos = And(new_x == 1, new_y == 2)
+        new_z = If(at_elevator_pos, 1 - pos_vars[2], pos_vars[2])
 
-        s.add(expected_vars[2] == final_z)
-        
-
-
-def make_model_euclidean(pos_vars, mov_vars):
-    return [pos + mov for (pos, mov) in zip(pos_vars, mov_vars)]
-
-def make_model_elevator(pos_vars, mov_vars):
-    new_x = pos_vars[0] + mov_vars[0]
-    new_y = pos_vars[1] + mov_vars[1]
-
-    at_elevator_pos = And(new_x == 1, new_y == 2)
-    new_z = If(at_elevator_pos, 1 - pos_vars[2], pos_vars[2])
-
-    return [new_x, new_y, new_z]
-
-    # s.add(out_vars[0] == new_x)
-    # s.add(out_vars[1] == new_y)
-    # s.add(out_vars[2] == new_z)
-
-# lvl = EuclideanSMTWrapper(Euclidean(3))
-# print(lvl.validate_with_smt(make_model_euclidean))
-
-
-lvl = ElevatorSMTWrapper()
-print(lvl.validate_with_smt(make_model_elevator))
+        s.add([exp == out for (exp, out) in zip(expected_vars, [new_x, new_y, new_z])])
