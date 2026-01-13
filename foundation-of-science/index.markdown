@@ -20,7 +20,18 @@ We try to keep this game as accessible as possible but you should be familiar wi
 
 [Elevator](marimo/game_interface.html?level=Elevator)
 
+[Simple time](marimo/game_interface.html?level=SimpleTime)
+
 ## Puzzle Level
+
+[Everything Random](marimo/game_interface.html?level=EverythingRandom)
 
 ## Geometry Levels
 These definitely require more preknowledge for instance about function exponentials, cos, sin etc.
+
+[Spherical](marimo/game_interface.html?level=Spherical)
+
+## Play a community level
+**Warning**: The level you were given may execute abritrary code in your browser
+
+[Community](marimo/game_interface.html?custom=true)

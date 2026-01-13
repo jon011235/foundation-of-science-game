@@ -1,6 +1,7 @@
 # Some thoughts and Ideas for the future
 ## Marimo features
 
+[ ] custom levels
 [ ] editor to submit either code or equations. When clicking check button sends this to our python code
 [ ] interactive plot together with a REPL to move in the level
     [ ] ability to reset level. Graph stays but now plots in different color

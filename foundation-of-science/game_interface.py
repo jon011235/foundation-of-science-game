@@ -1,6 +1,10 @@
+"""
+A webinterface for simple levels that are 2 or 3 dimensional in movement and position
+"""
+
 import marimo
 
-__generated_with = "0.19.0"
+__generated_with = "0.19.2"
 app = marimo.App()
 
 
@@ -29,12 +33,28 @@ async def _(micropip):
     import plotly.express as px
     return
 
-# TODO: only allow existing levels (generate this?)
 
 @app.cell
 def _(mo):
+    url_param = mo.query_params()
+    if url_param["custom"] == "true":
+        custom_code = mo.ui.code_editor(
+            value="class Level():\n...",
+            label="Paste the base64 encoded level here",
+            language="python"
+        )
+    else:
+        custom_code = None
+
+    custom_code
+    return (custom_code,)
+
+
+@app.cell
+def _(custom_code, mo):
     from pyodide.http import open_url
     from importlib.util import spec_from_loader, module_from_spec
+    import base64
 
     def _load_module_from_url(name: str, url: str):
         code = open_url(url).read()
@@ -46,25 +66,17 @@ def _(mo):
     # Hack to make it work both locally and on github pages
     base_url = "/marimo/game_backend.py"
     try:
-        gb = _load_module_from_url("gb", "/foundation-of-science-game/"+base_url)
+        gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
     except:
         gb = _load_module_from_url("gb", base_url)
 
     url_params = mo.query_params()
 
     # TODO I know this is incredibly insecure. I should add validation later when I have a list of levels
-    exec(f"currentLevel = gb.{url_params["level"]}") 
-
-    return (currentLevel,)
-
-
-@app.cell
-def _(mo):
-    # TODO get this from the level itself
-    mo.md(r"""
-    # Elevator
-    _Ever heard of a wormhole?_
-    """)
+    if url_params["custom"] == "true":
+        exec(base64.b64decode(custom_code.value))
+    else:
+        exec(f"currentLevel = gb.{url_params["level"]}") 
     return
 
 
@@ -83,7 +95,12 @@ def _(get_lvl):
 
 @app.cell
 def _(lvl, mo):
+    try:
+        mo.md(lvl.quote())
+    except:
+        pass
     mo.md(f"""
+
     ## Description
 
     {lvl.description()}
@@ -103,10 +120,23 @@ def _(mo):
 
 @app.cell
 def _(get_lvl, mo, np, save_name, set_lvl):
+    mo.md("test")
+    # Define move_inputs first so it is available for clojure
+    curr_lvl = get_lvl()
+    move_inputs = [
+        mo.ui.number(label=f"Move {axis}:")
+        for axis in "XYZ"[:curr_lvl.dim_move]
+    ]
+
     def move_btn_click(value):
-        if x_move.value is not None and y_move.value is not None:
-            curr_lvl = get_lvl()
-            curr_lvl.move(np.array([x_move.value, y_move.value]))
+        curr_lvl = get_lvl()
+        move_vec = []
+        for inp in move_inputs:
+            if inp.value is None:
+                return
+            move_vec.append(inp.value)
+        if len(move_vec) == curr_lvl.dim_move:
+            curr_lvl.move(np.array(move_vec))
             set_lvl(curr_lvl)
 
     def save_btn_click(value):
@@ -115,83 +145,103 @@ def _(get_lvl, mo, np, save_name, set_lvl):
             curr_lvl.save_point(save_name.value)
             set_lvl(curr_lvl)
 
-    # TODO add other interaction options + maybe sliders?
-    x_move = mo.ui.number(label="Move X:")
-    y_move = mo.ui.number(label="Move Y:")
     move_btn = mo.ui.button(label="Move", on_click=move_btn_click)
     save_btn = mo.ui.button(label="Save", on_click=save_btn_click)
-    return move_btn, save_btn, x_move, y_move
+    return move_btn, move_inputs, save_btn
 
 
 @app.cell
-def _(lvl, mo):
-    position = mo.md(f"""Current position: `{lvl.position}`""")
+def _(mo):
     save_name = mo.ui.text(label="Name:")
-    return position, save_name
+    return (save_name,)
+
+
+@app.cell
+def _(get_lvl, mo):
+    lvl0 = get_lvl()
+    pos_str = ", ".join([str(x) for x in lvl0.position])
+    position = mo.md(f"""Current position: `[{pos_str}]`""")
+    return (position,)
 
 
 @app.cell(hide_code=True)
-def _(mo, move_btn, position, save_btn, save_name, x_move, y_move):
+def _(mo, move_btn, move_inputs, position, save_btn, save_name):
+    stack = mo.vstack([*move_inputs, move_btn], align="start")
     mo.hstack([
-        mo.vstack([x_move, y_move, move_btn], align="start"),
+        stack,
         mo.vstack([position, save_name, save_btn], align="start"),
     ])
     return
 
 
 @app.cell(hide_code=True)
-def _(lvl, np):
+def _(get_lvl, np):
     import plotly.graph_objects as go
+    lvl3 = get_lvl()
 
-    # TODO for 2D level other plot possibility
-    def create_3d_plot(lvl):
+    def create_plot(lvl):
         points_dict = lvl.known_points
+        pts_list = list(points_dict.values()) if points_dict else []
+        names = list(points_dict.keys()) if points_dict else []
+        pos = lvl.position
 
-        fig = go.Figure()
-
-        # 1. Add the points
-        if points_dict:
-            # Extracting coordinates for all points
-            pts_list = list(points_dict.values())
-            pts = np.array(pts_list)
-            names = list(points_dict.keys())
-
+        if lvl.dim == 3:
+            fig = go.Figure()
+            if pts_list:
+                pts = np.array(pts_list)
+                fig.add_trace(go.Scatter3d(
+                    x=pts[:, 0], y=pts[:, 1], z=pts[:, 2],
+                    mode='markers+text',
+                    text=names,
+                    marker=dict(size=4, color='blue'),
+                    textposition="top center"
+                ))
             fig.add_trace(go.Scatter3d(
-                x=pts[:, 0], y=pts[:, 1], z=pts[:, 2],
-                mode='markers+text',
-                text=names,
-                marker=dict(size=4, color='blue'),
-                textposition="top center"
-            ))
-
-            fig.add_trace(go.Scatter3d(
-                x=[lvl.position[0]], y=[lvl.position[1]], z=[lvl.position[2]],
+                x=[pos[0]], y=[pos[1]], z=[pos[2]],
                 mode='markers',
                 marker=dict(size=5, color='red'),
             ))
-
-        # 2. Fix the Axes and Orientation
-        fig.update_layout(
-            scene=dict(
-                # Force axis limits
+            fig.update_layout(
+                scene=dict(
+                    xaxis=dict(range=[-10, 10], autorange=False),
+                    yaxis=dict(range=[-10, 10], autorange=False),
+                    zaxis=dict(range=[-10, 10], autorange=False),
+                    aspectmode='manual',
+                    aspectratio=dict(x=1, y=1, z=1),
+                    camera=dict(eye=dict(x=1.5, y=1, z=.5))
+                ),
+                uirevision='constant_value',
+                margin=dict(l=0, r=0, b=0, t=0),
+                showlegend=False
+            )
+        elif lvl.dim == 2:
+            fig = go.Figure()
+            if pts_list:
+                pts = np.array(pts_list)
+                fig.add_trace(go.Scatter(
+                    x=pts[:, 0], y=pts[:, 1],
+                    mode='markers+text',
+                    text=names,
+                    marker=dict(size=8, color='blue'),
+                    textposition="top center"
+                ))
+            fig.add_trace(go.Scatter(
+                x=[pos[0]], y=[pos[1]],
+                mode='markers',
+                marker=dict(size=10, color='red'),
+            ))
+            fig.update_layout(
                 xaxis=dict(range=[-10, 10], autorange=False),
                 yaxis=dict(range=[-10, 10], autorange=False),
-                zaxis=dict(range=[0, 1], autorange=False),
-                # Set fixed orientation (camera)
-                aspectmode='manual',
-                aspectratio=dict(x=1, y=1, z=0.2), # z is 1/5th the visual height of x/y
-
-                camera=dict(eye=dict(x=1.5, y=1, z=.5))
-            ),
-            # CRITICAL: This keeps the camera from resetting on update
-            uirevision='constant_value', 
-            margin=dict(l=0, r=0, b=0, t=0),
-            showlegend=False
-        )
-
+                uirevision='constant_value',
+                margin=dict(l=0, r=0, b=0, t=0),
+                showlegend=False,
+                yaxis_scaleanchor="x"
+            )
+        else:
+            fig = go.Figure()
         return fig
-
-    create_3d_plot(lvl)
+    create_plot(lvl3)
     return
 
 
@@ -217,7 +267,8 @@ def _(mo):
 
 
 @app.cell
-def _(lvl, mo, user_code):
+def _(get_lvl, mo, user_code):
+    lvl1 = get_lvl()
     def run_user_validation(code_string, check):
         namespace = {}
         # TODO Validate more of how the function has to be (list length etc) before passing to validation
@@ -234,20 +285,15 @@ def _(lvl, mo, user_code):
             success = check(user_model)
 
             if success:
-                return mo.md(f"✅ **Success**!: Your model correctly predicts the level's behavior.\n\n {lvl.solution_description()}")
+                return mo.md(f"✅ **Success**!: Your model correctly predicts the level's behavior.\n\n {lvl1.solution_description()}")
             else:
                 return mo.md("❌ **Validation Failed**: The model did not return the expected values for random trials.")
 
         except Exception as e:
             return mo.md(f"🛑 **Syntax or Runtime Error**: `{type(e).__name__}: {str(e)}`")
 
-    validation_result = run_user_validation(user_code.value, lvl.check)
+    validation_result = run_user_validation(user_code.value, lvl1.check)
     validation_result
-    return
-
-
-@app.cell
-def _():
     return
 
 

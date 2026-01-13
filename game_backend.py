@@ -116,6 +116,12 @@ It has been pointed out that maths is [unreasonably effective](https://en.wikipe
 
 Or should we always be careful not to mistake the map for the mountain? That is, (mathematical) models are useful as "maps" in as much as they predict how the world functions (i.e. show us the way through the mountains). But we should put little trust in maps of uncharted territories. Even if an elegant mathematical theory predicts some theoretical outcomes, should we only trust in it once we observe it empirically?"""
     
+    def quote(self):
+        return r"""
+    # Elevator
+    _Ever heard of a wormhole?_
+    """
+
     def move(self, movement_vector: np.ndarray):
         self.position += np.append(movement_vector, 0)
         if np.all(self.position == self.known_points["check me out"]):
