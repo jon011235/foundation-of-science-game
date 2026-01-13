@@ -442,11 +442,14 @@ class NObservation(Euclidean):
             a,b,c = model(a,b, self.observations)
             return a
         if not super().check(model_curried):
+            print("hahaha")
             return False
         
         for i in range(100):
             p = [random.randint(0, 150) for i in range(2)]
-            if [p in self.observations, self.observations] != model(p, [0,0], self.observations)[2:]:
+            result = model(p, [0,0], self.observations)
+            if p in self.observations != result[1] or self.observations != result[2]:
+                # print(p in self.observations, p, model(p, [0,0], self.observations)[:3])
                 return False
         return True
 
@@ -467,9 +470,8 @@ class Observation(NObservation):
         Differently to the previous level your model should take in a magic number between 0 and 3
 
         so model should have type model(position: List(int), movement: List(int), objects: List(List(int)), magic: int) -> (List(int), Bool, List(List(int)))"""
-        # TODO actually use random number generater objects instead of the global one, also for the previous level
     
-    # TODO they need to reverse basically exact this function...
+    # TODO they need to reverse basically exact this function... Do you have a better idea @andcov?
     def observe(self, magic=None):
         if magic is None:
             magic = random.randint(0,3)
@@ -479,10 +481,9 @@ class Observation(NObservation):
         else: return False
     
     def check(self, model):
-        def model_curried(a, b):
-            a,b, c = model(a,b, self.observations)
-            return a
-        if not super().check(model_curried):
+        def model_curried(a, b, c):
+            return  model(a,b, c, 1)
+        if not super().check(model_curried): # super = Nobservation
             return False
         
 
@@ -500,7 +501,7 @@ class Observation(NObservation):
             # if magic != 0, model must not claim an observation at a previously empty spot
             magic = random.randint(1, 3)
             out = model(p, [0, 0], self.observations, magic)
-            if out[1] or set(self.observations) != set(out[2]):
+            if out[1] or set(tuple(x) for x in self.observations) != set(tuple(x) for x in out[2]):
                 self.observations = save_observations
                 self.position = save_position
                 return False
@@ -515,7 +516,7 @@ class Observation(NObservation):
             # subsequent queries (any magic) must report the observation exists (persistence)
             for magic2 in (0, 1, 2, 3):
                 res = model(p, [0, 0], out[2], magic2)
-                if not res[1] or set(res[2]) != set(out[2]):
+                if not res[1] or set(tuple(x) for x in res[2]) != set(tuple(x) for x in out[2]):
                     self.observations = save_observations
                     self.position = save_position
                     return False
