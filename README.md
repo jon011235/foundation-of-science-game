@@ -30,7 +30,9 @@ If you have cool level ideas, we would love a pull request!
 But more importantly we would be really interested in improving the explanation and theoretical footings. If you are knowledgeable in didactics and/or epistemology, we would love to hear your suggestions for improvement.
 
 # Possible Roadmap
-[ ] put marimo in app mode
-[ ] put the observer levels on the web
+[ ] put marimo in app mode (with grid for better overview and more effective hiding of the code)
 [ ] more languages
 [ ] better level difficulty (and preknowledge) management to make it actually accesible for people that might find this interesting
+[ ] bonus feature: pagination to switch between different graphs and REPLs that are in different states
+[ ] a plot that scales when the position gets too large
+[ ] Bonus: Set cookies that enable the next levels?

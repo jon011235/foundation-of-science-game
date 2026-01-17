@@ -58,6 +58,7 @@ class Euclidean(Level):
         self.dim = dim
         self.dim_move = dim
         self.position = np.zeros(dim)
+        self.known_points = {}
     
     def description(self):
         return f"""This level takes {self.dim_move} values as a movementvector and
@@ -279,6 +280,8 @@ class Spherical(Level):
         # start at (θ=0, φ=π/2) → point on the equator, x = r
         self.position[0] = 0.0                 # azimuth  ∈ [0, 2π)
         self.position[1] = np.pi / 2.0         # polar    ∈ [0, π]
+        self.dim = 2
+        self.dim_move =2
 
         self.known_points = {}
 
@@ -362,6 +365,7 @@ This geometry is non-Euclidean. On a sphere, the sum of angles in a triangle is 
     """
 
     def move(self, movement_coords: np.ndarray):
+        movement_coords = np.array(movement_coords)
         """
         `movement_coords` is a length‑2 array:  [Δθ, Δφ]  (radians).
         The method adds the deltas to the current angles and normalises them,
@@ -466,7 +470,7 @@ This geometry is non-Euclidean. On a sphere, the sum of angles in a triangle is 
 
 import random
 
-class EverythingRandom(Level):
+class EverythingRandom(Euclidean):
     def __init__(self):
         self.dim = 2
         super().__init__()
@@ -543,7 +547,7 @@ If we repeat experiments where we either can not control all influences or the e
         save_position = self.position
 
         for i in range(100):
-            np.seed(i)
+            np.random.seed(i)
             pos = np.random.randint(-1000, 1000)
             magic = np.randint(0,1)
             move = np.ranom.randint(-1000, 1000)

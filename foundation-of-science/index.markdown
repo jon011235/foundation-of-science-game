@@ -3,35 +3,114 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
+title: Foundation of Science
 ---
 
-This is a game about different scenarios that might be encountered when trying to build a model of the world around us
+<style>
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 2rem;
+}
+.level-card {
+    display: block;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-decoration: none !important;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.level-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    background: white;
+}
+.level-name {
+    display: block;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+.level-meta {
+    display: block;
+    font-size: 0.85em;
+    color: #6c757d;
+}
+.warning-box {
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 2rem;
+    font-size: 0.9em;
+}
+</style>
 
-# Prerequesites
-We try to keep this game as accessible as possible but you should be familiar with
-- basic python
-- numpy (how to perform linear arithmetic on them and function like np.isclose)
+<div style="text-align: center; margin-bottom: 3rem;">
+    <p style="font-size: 1.25rem; color: #555;">
+        Explore unknown universes. Reverse-engineer physical laws. Write code.
+    </p>
+</div>
 
-## Understanding Levels
+<div class="warning-box">
+    <strong>⚠️ Security Note:</strong> Links to the game levels run code in your browser. Be careful when you get an external link to this page or load a custom level
+</div>
 
-<!-- TODO: make a nice button here and color it based on cookies set on a solve. Also only enable the next level when the previousl level was solved. Maybe generate all this structure from a external file, so it can also be used in the interface? -->
+### 🛠️ Prerequisites
+To play, you are the scientist. You will need:
+-   **Python**: Basic syntax and logic.
+-   **NumPy**: Only needed later, but helpful from the beginning (i.e. `np.isclose`).
 
-[Euclidean](marimo/game_interface.html?level=Euclidean)
+---
 
-[Elevator](marimo/game_interface.html?level=Elevator)
+### 🟢 Tutorial & Basics
+*Start here. Simple Introduction challenges.*
 
-[Simple time](marimo/game_interface.html?level=SimpleTime)
+<div class="level-grid">
+    <a href="marimo/game_interface.html?level=Euclidean" class="level-card">
+        <span class="level-name">Euclidean</span>
+        <span class="level-meta">The familiar flat world.</span>
+    </a>
+    <a href="marimo/game_interface.html?level=Elevator" class="level-card">
+        <span class="level-name">Elevator</span>
+        <span class="level-meta">Going up or down?</span>
+    </a>
+    <a href="marimo/game_interface.html?level=SimpleTime" class="level-card">
+        <span class="level-name">Simple Time</span>
+        <span class="level-meta">Limited Freedom</span>
+    </a>
+</div>
 
-## Puzzle Level
+### 🔵 Geometry Levels
+*Requires knowledge of trigonometry (sin, cos) and exponentials.*
 
-[Everything Random](marimo/game_interface.html?level=EverythingRandom)
+<div class="level-grid">
+    <a href="marimo/game_interface.html?level=Spherical" class="level-card">
+        <span class="level-name">Spherical</span>
+        <span class="level-meta">Curved space.</span>
+    </a>
+</div>
 
-## Geometry Levels
-These definitely require more preknowledge for instance about function exponentials, cos, sin etc.
+### 🟣 Puzzle Levels
+*Logic puzzles disguised as physics.*
 
-[Spherical](marimo/game_interface.html?level=Spherical)
+<div class="level-grid">
+    <a href="marimo/game_interface.html?level=EverythingRandom" class="level-card">
+        <span class="level-name">Everything Random</span>
+        <span class="level-meta">Does chaos have a pattern?</span>
+    </a>
+</div>
 
-## Play a community level
-**Warning**: The level you were given may execute abritrary code in your browser
+### 🟠 Community & Custom
+*Play levels created by others.*
 
-[Community](marimo/game_interface.html?custom=true)
+<div class="level-grid">
+    <a href="marimo/game_interface.html?custom=true" class="level-card" style="border-left: 4px solid #ffc107;">
+        <span class="level-name">Load Custom Level</span>
+        <span class="level-meta">Paste base64 level code.</span>
+    </a>
+</div>

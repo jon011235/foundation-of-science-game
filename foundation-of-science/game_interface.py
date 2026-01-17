@@ -36,9 +36,9 @@ async def _(micropip):
 @app.cell
 def _(mo):
     url_param = mo.query_params()
-    if url_param["custom"] == "true":
+    if url_param.get("custom") == "true":
         custom_code = mo.ui.code_editor(
-            value="class Level():\n...",
+            value="",
             label="Paste the base64 encoded level here",
             language="python"
         )
@@ -46,36 +46,39 @@ def _(mo):
         custom_code = None
 
     custom_code
-    return (custom_code,)
+    return
 
 
 @app.cell
-def _(custom_code, mo):
-    #from pyodide.http import open_url
-    from importlib.util import spec_from_loader, module_from_spec
-    import base64
+def _():
+    # from pyodide.http import open_url
+    # from importlib.util import spec_from_loader, module_from_spec
+    # import base64
 
-    def _load_module_from_url(name: str, url: str):
-        code = open_url(url).read()
-        module_spec = spec_from_loader(name, loader=None)
-        module = module_from_spec(module_spec)
-        exec(code, module.__dict__)
-        return module
+    # def _load_module_from_url(name: str, url: str):
+    #     code = open_url(url).read()
+    #     module_spec = spec_from_loader(name, loader=None)
+    #     module = module_from_spec(module_spec)
+    #     exec(code, module.__dict__)
+    #     return module
 
-    # Hack to make it work both locally and on github pages
-    base_url = "/marimo/game_backend.py"
-    try:
-        gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
-    except:
-        gb = _load_module_from_url("gb", base_url)
+    # # Hack to make it work both locally and on github pages
+    # base_url = "/marimo/game_backend.py"
+    # try:
+    #     gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
+    # except:
+    #     gb = _load_module_from_url("gb", base_url)
 
-    url_params = mo.query_params()
+    # url_params = mo.query_params()
 
-    # TODO I know this is incredibly insecure. I should add validation later when I have a list of levels
-    if url_params["custom"] == "true":
-        exec(base64.b64decode(custom_code.value))
-    else:
-        exec(f"currentLevel = gb.{url_params["level"]}") 
+    # if url_params.get("custom") == "true":
+    #     ns = {}
+    #     exec(base64.b64decode(custom_code.value), ns)
+    #     currentLevel = ns["Level"]
+    # else:
+    #     exec(f"currentLevel = gb.{url_params['level']}") 
+    import game_backend as gb
+    currentLevel = gb.EverythingRandom
     return (currentLevel,)
 
 
@@ -83,7 +86,21 @@ def _(custom_code, mo):
 def _(currentLevel, mo):
     # Initialize your level and store it in state
     get_lvl, set_lvl = mo.state(currentLevel())
-    return get_lvl, set_lvl
+    get_history, set_history = mo.state([])
+    get_repl_output, set_repl_output = mo.state("")
+    get_repl_code, set_repl_code = mo.state(
+        "# lvl.move((1,0,0))\nprint(lvl.position)"
+    )
+    return (
+        get_history,
+        get_lvl,
+        get_repl_code,
+        get_repl_output,
+        set_history,
+        set_lvl,
+        set_repl_code,
+        set_repl_output,
+    )
 
 
 @app.cell
@@ -95,15 +112,10 @@ def _(get_lvl):
 @app.cell
 def _(lvl, mo):
     try:
-        mo.md(lvl.quote())
+        quote = lvl.quote()
     except:
-        pass
-    mo.md(f"""
-
-    ## Description
-
-    {lvl.description()}
-    """)
+        quote = ""
+    mo.md(quote)
     return
 
 
@@ -118,8 +130,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_lvl, mo, np, save_name, set_lvl):
-    mo.md("test")
+def _(currentLevel, get_history, get_lvl, mo, save_name, set_history, set_lvl):
     # Define move_inputs first so it is available for clojure
     curr_lvl = get_lvl()
     move_inputs = [
@@ -144,9 +155,23 @@ def _(get_lvl, mo, np, save_name, set_lvl):
             curr_lvl.save_point(save_name.value)
             set_lvl(curr_lvl)
 
+    def reset_lvl_click(value):
+        import copy
+        curr_lvl = get_lvl()
+        hist = list(get_history())
+        pts_copy = copy.deepcopy(curr_lvl.known_points)
+        hist.append(pts_copy)
+        set_history(hist)
+        set_lvl(currentLevel())
+
+    def reset_plot_click(value):
+        set_history([])
+
     move_btn = mo.ui.button(label="Move", on_click=move_btn_click)
     save_btn = mo.ui.button(label="Save", on_click=save_btn_click)
-    return move_btn, move_inputs, save_btn
+    reset_lvl_btn = mo.ui.button(label="Reset Level", on_click=reset_lvl_click)
+    reset_plot_btn = mo.ui.button(label="Reset old points", on_click=reset_plot_click)
+    return move_btn, move_inputs, reset_lvl_btn, reset_plot_btn, save_btn
 
 
 @app.cell
@@ -164,28 +189,61 @@ def _(get_lvl, mo):
 
 
 @app.cell(hide_code=True)
-def _(mo, move_btn, move_inputs, position, save_btn, save_name):
+def _(
+    mo,
+    move_btn,
+    move_inputs,
+    position,
+    reset_lvl_btn,
+    reset_plot_btn,
+    save_btn,
+    save_name,
+):
     stack = mo.vstack([*move_inputs, move_btn], align="start")
     mo.hstack([
         stack,
         mo.vstack([position, save_name, save_btn], align="start"),
+        mo.vstack([reset_lvl_btn, reset_plot_btn], align="start")
     ])
     return
 
 
 @app.cell(hide_code=True)
-def _(get_lvl, np):
+def _(get_history, get_lvl, np):
     import plotly.graph_objects as go
     lvl3 = get_lvl()
+    history = get_history()
 
-    def create_plot(lvl):
+    def create_plot(lvl, history):
         points_dict = lvl.known_points
         pts_list = list(points_dict.values()) if points_dict else []
         names = list(points_dict.keys()) if points_dict else []
         pos = lvl.position
 
+        fig = go.Figure()
+
+        # Plot history
+        for hist_pts_dict in history:
+            h_pts_list = list(hist_pts_dict.values())
+            if not h_pts_list: continue
+            h_pts = np.array(h_pts_list)
+
+            if lvl.dim == 3:
+                fig.add_trace(go.Scatter3d(
+                    x=h_pts[:, 0], y=h_pts[:, 1], z=h_pts[:, 2],
+                    mode='markers',
+                    marker=dict(size=3, color='gray', opacity=0.5),
+                    hoverinfo='skip'
+                ))
+            elif lvl.dim == 2:
+                fig.add_trace(go.Scatter(
+                    x=h_pts[:, 0], y=h_pts[:, 1],
+                    mode='markers',
+                    marker=dict(size=6, color='gray', opacity=0.5),
+                    hoverinfo='skip'
+                ))
+
         if lvl.dim == 3:
-            fig = go.Figure()
             if pts_list:
                 pts = np.array(pts_list)
                 fig.add_trace(go.Scatter3d(
@@ -214,7 +272,6 @@ def _(get_lvl, np):
                 showlegend=False
             )
         elif lvl.dim == 2:
-            fig = go.Figure()
             if pts_list:
                 pts = np.array(pts_list)
                 fig.add_trace(go.Scatter(
@@ -240,13 +297,69 @@ def _(get_lvl, np):
         else:
             fig = go.Figure()
         return fig
-    create_plot(lvl3)
+    create_plot(lvl3, history)
     return
 
 
 @app.cell
 def _(mo):
     mo.md(r"""
+    ## Interactive Shell
+    """)
+    return
+
+
+@app.cell
+def _(get_lvl, get_repl_code, mo, set_lvl, set_repl_code, set_repl_output):
+    repl_code = mo.ui.code_editor(
+        value=get_repl_code(),
+        label="Code",
+        language="python",
+        on_change=set_repl_code
+    )
+
+    def run_repl(value):
+        import io
+        import contextlib
+        import numpy as np
+        # ... existing code ...
+
+        lvl = get_lvl()
+
+        # Capture stdout
+        f = io.StringIO()
+        with contextlib.redirect_stdout(f):
+            try:
+                ns = {"lvl": lvl, "np": np}
+                exec(repl_code.value, ns)
+                if "lvl" in ns:
+                     set_lvl(ns["lvl"])
+            except Exception as e:
+                print(e)
+
+        set_repl_output(f.getvalue())
+
+    run_btn = mo.ui.button(label="Run", on_click=run_repl)
+    return repl_code, run_btn
+
+
+@app.cell
+def _(get_repl_output, mo, repl_code, run_btn):
+    mo.vstack([
+        repl_code,
+        run_btn,
+        mo.md(f"```\n{get_repl_output()}\n```")
+    ])
+    return
+
+
+@app.cell
+def _(get_lvl, mo):
+    mo.md(f"""
+    ## Description
+
+    {get_lvl().description()}
+
     ## Model
     """)
     return
@@ -254,9 +367,8 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    # TODO: Be clearer what the form of the function has to be (including list size)
     user_code = mo.ui.code_editor(
-        value="def model(position, movement):\n  return []",
+        value="def model(position, movement):\n  return ()",
         label="Write your model here:",
         language="python"
     )
@@ -280,6 +392,8 @@ def _(get_lvl, mo, user_code):
                 return mo.md("⚠️ **Error:** You must define a function named `model`.")
             user_model = namespace["model"]
 
+            # TODO check types better (List return causes Validation failed)
+
             success = check(user_model)
 
             if success:
@@ -289,7 +403,6 @@ def _(get_lvl, mo, user_code):
 
         except Exception as e:
             return mo.md(f"🛑 **Syntax or Runtime Error**: `{type(e).__name__}: {str(e)}`")
-
 
     validation_result = run_user_validation(user_code.value, lvl1.check)
     validation_result
