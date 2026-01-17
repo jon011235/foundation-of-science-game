@@ -54,7 +54,7 @@ class Level():
         raise NotImplemented
 
 class Euclidean(Level):
-    def __init__(self, dim: int = 3):
+    def __init__(self, dim: int = 3, dim_move: int = 3):
         self.dim = dim
         self.dim_move = dim
         self.position = np.zeros(dim)
@@ -472,18 +472,17 @@ import random
 
 class EverythingRandom(Euclidean):
     def __init__(self):
-        self.dim = 2
-        super().__init__()
-        random.seed(749698524)
-    """ the seed was derived by this heavenly brute force, which did not run to its success
-    maximun = 0
+        super().__init__(2, 2)
+        self.rng = np.random.default_rng(26764197)
+    """ the seed was derived by this heavenly brute force, which did not run to its success (highest tested seed: 471539671 outputs 1 for 31 times)
+    maximum = 0
     seed = 0
     i = 0
 
     while maximum != 100:
-        random.seed(seed)
+        r = np.random.default_rng(seed)
         i = 0
-        while random.randint(0,1) ==1:
+        while r.integers(0,2) ==1:
             i+=1
         if i>maximum:
             maximum = i
@@ -540,33 +539,32 @@ If we repeat experiments where we either can not control all influences or the e
 
     def move(self, movement_vector: np.ndarray, magic=None):
         if magic is None:
-            magic = np.randint(0,1)
-        self.position += magic*unit_vector(movement_vector)
+            magic = self.rng.integers(0,2)
+        self.position += np.round(magic*unit_vector(movement_vector), 3)
     
     def check(self, model):
         save_position = self.position
 
         for i in range(100):
-            np.random.seed(i)
-            pos = np.random.randint(-1000, 1000)
-            magic = np.randint(0,1)
-            move = np.ranom.randint(-1000, 1000)
+            pos = np.float64(np.random.randint(-1000, 1000, 2))
+            magic = np.random.randint(0,2)
+            move = np.random.randint(-1000, 1000, 2)
             self.position = pos.copy()
             self.move(move, magic)
-            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move), magic):
+            if not np.isclose(self.position, np.round(np.array(model(nparr_to_tuple(pos), nparr_to_tuple(move), magic)), 3)).all():
                 self.position = save_position
                 return False
         
         self.position = save_position
         return True
 
+
 class NObservation(Euclidean):
     # roughly every second has something to observe
     observations = [(random.randint(0,100), random.randint(0,100)) for i in range(5000)]
 
     def __init__(self):
-        self.dim = 2
-        super().__init__()
+        super().__init__(2, 2)
 
     def observe(self):
         return self.position in self.observations
@@ -589,14 +587,16 @@ class NObservation(Euclidean):
 
     def check(self, model):
         def model_curried(a, b):
-            a,b = model(a,b, self.observations)
+            a,b,c = model(a,b, self.observations)
             return a
-        if not super.check(model_curried):
+        if not super().check(model_curried):
             return False
         
         for i in range(100):
-            p = tuple(random.randint(0, 150) for i in range(2))
-            if (p in self.observations) != model(p, [0,0], self.observations):
+            p = (random.randint(0, 150) for i in range(2))
+            result = model(p, (0,0), self.observations)
+            if p in self.observations != result[1] or self.observations != result[2]:
+                # print(p in self.observations, p, model(p, (0,0), self.observations)[:3])
                 return False
         return True
 
@@ -605,7 +605,6 @@ class Observation(NObservation):
     observations = []
 
     def __init__(self):
-        self.dim = 2
         super().__init__()
         
     
@@ -613,21 +612,13 @@ class Observation(NObservation):
         return """This level takes 2 dimensions as a movement and positionvector.
 
         This level allows to observe stuff, we already looked around in the world for a bit and will give you those things using the objects list (a list with the position of the objects in 2d space).
-        As a new thing please also return, whether there is something to be observed at the place where you are after the movement
+        As a new thing please also return, whether there is something to be observed at the place where you are after the movement. Also return the observations you made
 
-        Differently to the previous level your model should take in a seed for python random number generator
+        Differently to the previous level your model should take in a magic number between 0 and 3
 
-        So model should have type model(position: Tuple[int, int], movement: Tuple[int, int], objects: List(Tuple[int, int]), magic: int) -> (Tuple[int, int], Bool)"""
-        # TODO actually use random number generater objects instead of the global one, also for the previous level
+        so model should have type model(position: List(int), movement: List(int), objects: List(List(int)), magic: int) -> (List(int), Bool, List(List(int)))"""
     
-    def quote(self):
-        return r"""
-    # Observation
-    _We have to remember that what we observe is not nature herself, but nature exposed to our method of questioning._
-    - Werner Heisenberg
-    """
-
-    # TODO they need to reverse basically exact this function...
+    # TODO they need to reverse basically exact this function... Do you have a better idea @andcov?
     def observe(self, magic=None):
         if magic is None:
             magic = random.randint(0,3)
@@ -637,19 +628,50 @@ class Observation(NObservation):
         else: return False
     
     def check(self, model):
-        def model_curried(a, b):
-            a,b = model(a,b, self.observations, random.randint(0, 10))
-            return a
-        if not super.check(model_curried):
+        def model_curried(a, b, c):
+            return  model(a,b, c, 1)
+        if not super().check(model_curried): # super = Nobservation
             return False
         
 
-        # TODO
-        # Test no obervations there before
-        # Test observations are persistent
+        # Test no observations there before
+        save_observations = list(self.observations)
+        save_position = self.position.copy()
 
-        for i in range(100):
-            p = tuple(random.randint(0, 150) for i in range(2))
-            if (p in self.observations) != model(p, [0,0], self.observations):
+        # Now test observation generation and persistence
+        for _ in range(500):
+            # pick a position that is not currently observed
+            p = (random.randint(0, 150), random.randint(0, 150))
+            if p in self.observations:
+                continue
+
+            # if magic != 0, model must not claim an observation at a previously empty spot
+            magic = random.randint(1, 3)
+            out = model(p, (0, 0), self.observations, magic)
+            if out[1] or set(self.observations) != set(out[2]):
+                self.observations = save_observations
+                self.position = save_position
                 return False
+
+            # with magic == 0 the model should report an observation
+            out = model(p, (0, 0), self.observations, 0)
+            if not out[1] or not p in out[2]:
+                self.observations = save_observations
+                self.position = save_position
+                return False
+
+            # subsequent queries (any magic) must report the observation exists (persistence)
+            for magic2 in (0, 1, 2, 3):
+                res = model(p, (0, 0), out[2], magic2)
+                if not res[1] or set(res[2]) != set(out[2]):
+                    self.observations = save_observations
+                    self.position = save_position
+                    return False
+
+
+        # restore and succeed
+        self.observations = save_observations
+        self.position = save_position
         return True
+
+
