@@ -51,34 +51,34 @@ def _(mo):
 
 @app.cell
 def _():
-    # from pyodide.http import open_url
-    # from importlib.util import spec_from_loader, module_from_spec
-    # import base64
+    from pyodide.http import open_url
+    from importlib.util import spec_from_loader, module_from_spec
+    import base64
 
-    # def _load_module_from_url(name: str, url: str):
-    #     code = open_url(url).read()
-    #     module_spec = spec_from_loader(name, loader=None)
-    #     module = module_from_spec(module_spec)
-    #     exec(code, module.__dict__)
-    #     return module
+    def _load_module_from_url(name: str, url: str):
+        code = open_url(url).read()
+        module_spec = spec_from_loader(name, loader=None)
+        module = module_from_spec(module_spec)
+        exec(code, module.__dict__)
+        return module
 
-    # # Hack to make it work both locally and on github pages
-    # base_url = "/marimo/game_backend.py"
-    # try:
-    #     gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
-    # except:
-    #     gb = _load_module_from_url("gb", base_url)
+    # Hack to make it work both locally and on github pages
+    base_url = "/marimo/game_backend.py"
+    try:
+        gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
+    except:
+        gb = _load_module_from_url("gb", base_url)
 
-    # url_params = mo.query_params()
+    url_params = mo.query_params()
 
-    # if url_params.get("custom") == "true":
-    #     ns = {}
-    #     exec(base64.b64decode(custom_code.value), ns)
-    #     currentLevel = ns["Level"]
-    # else:
-    #     exec(f"currentLevel = gb.{url_params['level']}") 
-    import game_backend as gb
-    currentLevel = gb.EverythingRandom
+    if url_params.get("custom") == "true":
+        ns = {}
+        exec(base64.b64decode(custom_code.value), ns)
+        currentLevel = ns["Level"]
+    else:
+        exec(f"currentLevel = gb.{url_params['level']}") 
+    # import game_backend as gb
+    # currentLevel = gb.EverythingRandom
     return (currentLevel,)
 
 
