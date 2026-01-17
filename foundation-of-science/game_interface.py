@@ -16,7 +16,6 @@ def _():
 
 @app.cell
 def _():
-    import pandas
     import numpy as np
     return (np,)
 
@@ -52,7 +51,7 @@ def _(mo):
 
 @app.cell
 def _(custom_code, mo):
-    from pyodide.http import open_url
+    #from pyodide.http import open_url
     from importlib.util import spec_from_loader, module_from_spec
     import base64
 
@@ -77,7 +76,7 @@ def _(custom_code, mo):
         exec(base64.b64decode(custom_code.value))
     else:
         exec(f"currentLevel = gb.{url_params["level"]}") 
-    return
+    return (currentLevel,)
 
 
 @app.cell
@@ -136,7 +135,7 @@ def _(get_lvl, mo, np, save_name, set_lvl):
                 return
             move_vec.append(inp.value)
         if len(move_vec) == curr_lvl.dim_move:
-            curr_lvl.move(np.array(move_vec))
+            curr_lvl.move(tuple(move_vec))
             set_lvl(curr_lvl)
 
     def save_btn_click(value):
@@ -271,7 +270,7 @@ def _(get_lvl, mo, user_code):
     lvl1 = get_lvl()
     def run_user_validation(code_string, check):
         namespace = {}
-        # TODO Validate more of how the function has to be (list length etc) before passing to validation
+        # TODO Validate more of how the function has to be (tuple length etc) before passing to validation
         try:
             # 1. Execute the code string in the namespace
             exec(code_string, namespace)
@@ -279,7 +278,6 @@ def _(get_lvl, mo, user_code):
             # 2. Extract the 'model' function
             if "model" not in namespace or not callable(namespace["model"]):
                 return mo.md("⚠️ **Error:** You must define a function named `model`.")
-
             user_model = namespace["model"]
 
             success = check(user_model)
@@ -291,6 +289,7 @@ def _(get_lvl, mo, user_code):
 
         except Exception as e:
             return mo.md(f"🛑 **Syntax or Runtime Error**: `{type(e).__name__}: {str(e)}`")
+
 
     validation_result = run_user_validation(user_code.value, lvl1.check)
     validation_result

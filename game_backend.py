@@ -20,8 +20,8 @@ def angle_between(v1, v2):
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
-def nparr_to_list(arr):
-    return [int(i) for i in arr]
+def nparr_to_tuple(arr):
+    return tuple(int(i) for i in arr)
 # ==============================================================
 
 class Level():
@@ -49,6 +49,9 @@ class Level():
     
     def check(self, model): # odel is a function that given the context (i.e. the position and where to move) and predicts how a state (i.e. the position) changes
         raise NotImplemented
+    
+    def quote(self):
+        raise NotImplemented
 
 class Euclidean(Level):
     def __init__(self, dim: int = 3):
@@ -57,12 +60,29 @@ class Euclidean(Level):
         self.position = np.zeros(dim)
     
     def description(self):
-        return """This level takes dim (usually 3) values as a movementvector and
-        expects the model to take a dim sized list position and a dim sized list movement_vector
-        it should return a dim sized list with the predicted new position
+        return f"""This level takes {self.dim_move} values as a movementvector and
+        expects the model to take a {self.dim} sized tuple `position` and a {self.dim_move} sized tuple `movement_vector`.
+        It should return a {self.dim} sized tuple with the predicted new position.
         
-        so model should have type model(position: List(int), movement: List(int)) -> List(int) where every list is dim long"""
+        So `model` should have type `model(position: Tuple[int, ...], movement: Tuple[int, ...]) -> Tuple[int, ...]`
+        where the tuples have size {self.dim}, {self.dim_move} and {self.dim} respectively."""
     
+    def solution_description(self):
+        return """This is just a normal [Euclidean](https://en.wikipedia.org/wiki/Euclidean_geometry) geometry that we are used to, from our normal lifes.
+A possible solution is:
+```python
+def model(position, movement):
+    return tuple(p+m for (p,m) in zip(position, movement))
+```
+"""
+    
+    def quote(self):
+        return r"""
+    # Euclidean
+    _There is no royal road to geometry._ 
+    -- Euclid
+    """
+
     def move(self, movement_vector: np.ndarray):
         self.position += movement_vector
     
@@ -81,7 +101,7 @@ class Euclidean(Level):
         for i in range(100):
             pos = np.random.randint(-1000, 1000, self.dim)
             move = np.random.randint(-1000, 1000, self.dim)
-            if nparr_to_list(pos+move) != model(nparr_to_list(pos), nparr_to_list(move)):
+            if nparr_to_tuple(pos+move) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
                 return False
         return True
 
@@ -93,24 +113,26 @@ class Elevator(Euclidean):
         self.known_points["check me out"] = np.array([1,2,0])
 
     def description(self):
-        return """In this level, positions are represented by 3-dimensional lists, while the movement vector by a 2-dimensional list. Given the current position and a movement vector, you need to predict the next position.
+        return """In this level, positions are represented by 3-dimensional tuples, while the movement vector by a 2-dimensional tuple. Given the current position and a movement vector, you need to predict the next position.
         
-        `model` should have type `model(position: List(int), movement: List(int)) -> List(int)`"""
+        `model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
 
     def solution_description(self):
-        return """The world seems to consist of a simple 2-dimensional plane, until you travel to `[1, 2, 0]`. Here, you get "teleported" to the parallel plane `z = 1`.
+        return """The world seems to consist of a simple 2-dimensional plane, until you travel to `(1, 2, 0)`. Here, you get "teleported" to the parallel plane `z = 1`.
 
 A possible solution is:
 ```py
 def model(position, movement):
+    # Convert tuple to list to modify
+    pos = list(position)
     for i in range(2):
-        position[i] += movement[i]
-    if position[0] == 1 and position[1] == 2:
-        position[2] = 1 - position[2]
-    return position
+        pos[i] += movement[i]
+    if pos[0] == 1 and pos[1] == 2:
+        pos[2] = 1 - pos[2]
+    return tuple(pos)
 ```
 
-You could think of `[1, 2, 0]` as a [wormhole](https://en.wikipedia.org/wiki/Wormhole), a hypothetical structure that connects seemingly desperate points in space. Fascinating about wormholes is that the mathematical framework of general relativity _allows for their existence_. Does this imply that they exist? Or that they could?
+You could think of `(1, 2, 0)` as a [wormhole](https://en.wikipedia.org/wiki/Wormhole), a hypothetical structure that connects seemingly desperate points in space. Fascinating about wormholes is that the mathematical framework of general relativity _allows for their existence_. Does this imply that they exist? Or that they could?
 
 It has been pointed out that maths is [unreasonably effective](https://en.wikipedia.org/wiki/The_Unreasonable_Effectiveness_of_Mathematics_in_the_Natural_Sciences) at modelling the natural word. And indeed, when we try to model simple physics experiments, we often reach mathematical descriptions that apply to a large class of phenomena. Is there underlying truth to these models? Should we expect that mathematical possibilities in our models will translate to (yet-unobserved) physical phenomena?
 
@@ -138,7 +160,7 @@ Or should we always be careful not to mistake the map for the mountain? That is,
             self.position = pos.copy()
             move = np.random.randint(-1000, 1000, 2)
             self.move(move)
-            if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
+            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
                 self.position = save_position
                 return False
     
@@ -148,7 +170,7 @@ Or should we always be careful not to mistake the map for the mountain? That is,
             self.position = pos.copy()
             move = np.random.randint(-10, 10, 2)
             self.move(move)
-            if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
+            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
                 self.position = save_position
                 return False
     
@@ -156,7 +178,7 @@ Or should we always be careful not to mistake the map for the mountain? That is,
         self.position = pos.copy()
         move = [-29, -18]
         self.move(move)
-        if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
+        if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
             self.position = save_position
             return False
     
@@ -164,7 +186,7 @@ Or should we always be careful not to mistake the map for the mountain? That is,
         self.position = pos.copy()
         move = [-29, -18]
         self.move(move)
-        if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
+        if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
             self.position = save_position
             return False
     
@@ -181,12 +203,34 @@ class SimpleTime(Euclidean):
         self.dim_move = 2
     
     def description(self):
-        return """This level takes 2 dimensions as a movementvector and
-        expects the model to take a 3 dimensional position and a 2 dimensional movement_vector
-        it should return a 3 dimensional list with the predicted new position
+        return """This level takes 2 dimensions as a movementvector (tuple) and
+        expects the model to take a 3 dimensional `position` tuple and a 2 dimensional `movement_vector` tuple.
+        It should return a 3 dimensional tuple with the predicted new position
         
-        so model should have type model(position: List(int), movement: List(int)) -> List(int)"""
+        So `model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
     
+    def solution_description(self):
+        return """
+A possible solution is:
+```python
+import math
+def model(p, m):
+    pos = (p[0]+m[0], p[1]+m[1], p[2]+round(math.sqrt(m[0]**2 + m[1]**2)))
+    return pos
+```
+
+Notice how the third dimension always increases as you move? This mirrors how [Time](https://en.wikipedia.org/wiki/Spacetime) behaves in our universe. In physics, space and time are fused into a four-dimensional continuum called spacetime. We can move freely in space, but we are seemingly forced to move forward in time.
+
+Or is it related to entropy? The [Second Law of Thermodynamics](https://en.wikipedia.org/wiki/Second_law_of_thermodynamics) states that the total entropy of an isolated system can never decrease over time. This gives time an arrow, a direction.
+"""
+
+    def quote(self):
+        return r"""
+    # SimpleTime
+    _The distinction between the past, present and future is only a stubbornly persistent illusion._
+    -- Albert Einstein
+    """
+
     def move(self, movement_vector: np.ndarray):
         self.position += np.append(movement_vector, round(np.sqrt(movement_vector[0]**2+movement_vector[1]**2)))
     
@@ -198,7 +242,7 @@ class SimpleTime(Euclidean):
             self.position = pos.copy()
             move = np.random.randint(-1000, 1000, 2)
             self.move(move)
-            if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
+            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
                 self.position = save_position
                 return False
         
@@ -207,7 +251,7 @@ class SimpleTime(Euclidean):
             self.position = pos.copy()
             move = np.random.randint(-10, 10, 2)
             self.move(move)
-            if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move)):
+            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
                 self.position = save_position
                 return False
         self.position = save_position
@@ -267,8 +311,55 @@ class Spherical(Level):
     # Public API required by the framework
     # ------------------------------------------------------------------ #
     def description(self):
-        return """This level takes a 3‑dimensional position and a 2‑dimensional movement
-vector, updates the position, and lets you save/measure points."""
+        return """This level takes 3 dimensions as a movementvector (tuple) and
+        expects the model to take a 2 dimensional `position` tuple and a 2 dimensional `movement_vector` tuple.
+        It should return a 3 dimensional tuple with the predicted new position
+        
+        So `model` should have type `model(position: Tuple[float, float, float], movement: Tuple[float, float]) -> Tuple[float, float, float]`"""
+
+    def solution_description(self):
+        return """This level represents movement on a [Sphere](https://en.wikipedia.org/wiki/Sphere), using spherical coordinates (azimuth, polar angle, radius).
+
+A possible solution is:
+```python
+import math
+
+def model(position, movement):
+    # position is (theta, phi, r)
+    # movement is (d_theta, d_phi)
+    
+    theta = position[0] + movement[0]
+    phi = position[1] + movement[1]
+    r = position[2]
+
+    # Normalize theta to [0, 2pi)
+    theta = theta % (2 * math.pi)
+
+    # Handle pole crossings for phi
+    while phi < 0 or phi > math.pi:
+        if phi < 0:
+            phi = -phi
+            theta += math.pi
+        elif phi > math.pi:
+            phi = 2 * math.pi - phi
+            theta += math.pi
+            
+        # Re-normalize theta in case it flipped
+        theta = theta % (2 * math.pi)
+
+    return (theta, phi, r)
+```
+
+Historically, realizing the Earth was spherical required looking at the stars or observing ships disappear hull-first over the horizon. In this model, you might have noticed that moving "East" (changing $\\theta$) eventually brings you back to where you started, or that moving "North" (changing $\\phi$) behaves strangely near the poles.
+
+This geometry is non-Euclidean. On a sphere, the sum of angles in a triangle is greater than 180 degrees!
+"""
+
+    def quote(self):
+        return r"""
+    # Spherical
+    _The shortest path between two points is not always a straight line._ 
+    """
 
     def move(self, movement_coords: np.ndarray):
         """
@@ -328,12 +419,12 @@ vector, updates the position, and lets you save/measure points."""
         """
         Randomly generate 100 positions (θ, φ) and movement vectors (Δθ, Δφ).
         For each trial:
-          1. Build the position list   → [θ, φ, r]
-          2. Build the movement list   → [Δθ, Δφ]
+          1. Build the position tuple   → (θ, φ, r)
+          2. Build the movement tuple   → (Δθ, Δφ)
           3. Compute the expected new spherical coordinates
              using the same logic as `move`.
           4. Call the model and verify:
-                * it returns a list of length 3,
+                * it returns a tuple of length 3,
                 * the radius component equals `self.r` (within tolerance),
                 * the returned angles match the expected ones (tolerance 1e‑5).
         """
@@ -341,22 +432,22 @@ vector, updates the position, and lets you save/measure points."""
             # ----- random position -----
             theta = np.random.uniform(0, 2 * np.pi)
             phi   = np.random.uniform(0, np.pi)
-            pos_list = [theta, phi, self.r]
+            pos_tuple = (theta, phi, self.r)
 
             # ----- random movement (Δθ, Δφ) -----
             dtheta = np.random.uniform(-np.pi, np.pi)          # up to half‑circumference
             dphi   = np.random.uniform(-np.pi / 2, np.pi / 2)   # avoid jumping over both poles at once
-            mov_list = [dtheta, dphi]
+            mov_tuple = (dtheta, dphi)
 
             # ----- expected new state -----
             # copy current angles so the level isn’t polluted for the next loop
             self.position[0], self.position[1] = theta, phi
             self.move(np.array([dtheta, dphi]))
-            expected = [self.position[0], self.position[1], self.r]
+            expected = (self.position[0], self.position[1], self.r)
 
             # ----- model output -----
             try:
-                out = model(pos_list, mov_list)
+                out = model(pos_tuple, mov_tuple)
             except Exception:
                 return False
 
@@ -381,7 +472,7 @@ class EverythingRandom(Level):
         super().__init__()
         random.seed(749698524)
     """ the seed was derived by this heavenly brute force, which did not run to its success
-    maximum = 0
+    maximun = 0
     seed = 0
     i = 0
 
@@ -400,9 +491,49 @@ class EverythingRandom(Level):
     def description(self):
         return """This level takes 2 dimensions as a movement and positionvector.
         
-        Your model should also use our magic number, that we will pass to you
-        so model should have type model(position: List(int), movement: List(int), magic_number: int) -> List(int)"""
+        Your model should also use our magic number, that we will pass to you.
+        So `model` should have type `model(position: Tuple[int, int], movement: Tuple[int, int], magic_number: int) -> Tuple[int, int]`"""
     
+    def solution_description(self):
+        return """
+Did I trick you here? Everything feels so well behaved and then all out of a sudden nothing makes sense anymore.
+While the model does get a `magic_number` the level at first does not fell like it needs such a random/magic number
+
+A possible solution involves realizing the `magic_number` acts as a multiplier or switch for the movement:
+```python
+import numpy as np
+def unit_vector(vector):
+    base = np.sqrt(sum(i**2 for i in vector))
+    if base == 0:
+        return tuple(0 for i in vector)
+    else:
+        return tuple(i/base for i in vector)
+
+def model(position, movement, magic_number):
+    # When 0, position doesn't change.
+    # When 1, position moves by the unit vector of movement.
+    
+    pos_arr = np.array(position)
+    mov_arr = np.array(movement)
+    
+    if magic_number == 0:
+        return tuple(pos_arr)
+    else:
+        uv = unit_vector(mov_arr)
+        new_pos = pos_arr + magic_number * uv
+        return tuple(int(x) for x in new_pos)
+```
+
+If we repeat experiments where we either can not control all influences or the experiment has some inherent randomness we always have to assume to risk of just recording `lucky` outcomes, that fit our hypothesis instead of the actual dynamic. One way to estimate the probability of this is to use a [hypothesis test](https://en.wikipedia.org/wiki/Statistical_hypothesis_test) where we estimate the probability of our hypothesis being wrong given some datapoints.
+"""
+
+    def quote(self):
+        return r"""
+    # EverythingRandom
+    _God does not play dice with the universe._
+    -- Albert Einstein
+    """
+
     def move(self, movement_vector: np.ndarray, magic=None):
         if magic is None:
             magic = np.randint(0,1)
@@ -418,7 +549,7 @@ class EverythingRandom(Level):
             move = np.ranom.randint(-1000, 1000)
             self.position = pos.copy()
             self.move(move, magic)
-            if nparr_to_list(self.position) != model(nparr_to_list(pos), nparr_to_list(move), magic):
+            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move), magic):
                 self.position = save_position
                 return False
         
@@ -440,11 +571,17 @@ class NObservation(Euclidean):
     def description(self):
         return """This level takes 2 dimensions as a movement and positionvector.
 
-        This level allows to observe stuff, we already looked around in the world for a bit and will give you those things using the objects list (a list with the position of the objects in 2d space)
+        This level allows to observe stuff, we already looked around in the world for a bit and will give you those things using the objects lists (a list with the position of the objects in 2d space)
         As a new thing please also return, whether there is something to be observed at the place where you are after the movement
 
-        so model should have type model(position: List(int), movement: List(int), objects: List(List(int))) -> (List(int), Bool)"""
+        So model should have type model(position: Tuple[int, int], movement: Tuple[int, int], objects: List(Tuple[int, int])) -> (Tuple[int, int], Bool)"""
     
+    def quote(self):
+        return r"""
+    # NObservation
+    _You see, but you do not observe._
+    -- Sherlock Holmes
+    """
 
     def check(self, model):
         def model_curried(a, b):
@@ -454,7 +591,7 @@ class NObservation(Euclidean):
             return False
         
         for i in range(100):
-            p = [random.randint(0, 150) for i in range(2)]
+            p = tuple(random.randint(0, 150) for i in range(2))
             if (p in self.observations) != model(p, [0,0], self.observations):
                 return False
         return True
@@ -476,9 +613,16 @@ class Observation(NObservation):
 
         Differently to the previous level your model should take in a seed for python random number generator
 
-        so model should have type model(position: List(int), movement: List(int), objects: List(List(int)), magic: int) -> (List(int), Bool)"""
+        So model should have type model(position: Tuple[int, int], movement: Tuple[int, int], objects: List(Tuple[int, int]), magic: int) -> (Tuple[int, int], Bool)"""
         # TODO actually use random number generater objects instead of the global one, also for the previous level
     
+    def quote(self):
+        return r"""
+    # Observation
+    _We have to remember that what we observe is not nature herself, but nature exposed to our method of questioning._
+    - Werner Heisenberg
+    """
+
     # TODO they need to reverse basically exact this function...
     def observe(self, magic=None):
         if magic is None:
@@ -501,7 +645,7 @@ class Observation(NObservation):
         # Test observations are persistent
 
         for i in range(100):
-            p = [random.randint(0, 150) for i in range(2)]
+            p = tuple(random.randint(0, 150) for i in range(2))
             if (p in self.observations) != model(p, [0,0], self.observations):
                 return False
         return True

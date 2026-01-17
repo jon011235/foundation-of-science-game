@@ -11,18 +11,26 @@ A little programming game that helps to familiarize with the scientific method a
     [x] more dimensions
 [x] random numbers appear to build coherrent picture
 - obsever dependence (needs things that can be observed)
-[ ] inter universe independence
-
+[x] inter universe independence
+[ ] level with search space programatically
 
 not clear how to implement yet:
 - measurement errors?
 
 # How to get started
-Right now there is not yet a whole game just single levels.
-Either run `terminal_interface.py` to have a nice interface surrounding the level or create an instance of `Euclidean` in a shell and explore it directly (of course without peeking at the definition or guessing something from the name)
+Just visit the github page of [this project](jon011235.github.io/foundation-of-science-game) and start a level.
+If you have problems with your browser or want to interact with the level more flexibly just clone this and directly interact with the levels class (or use out `terminal_interface.py`). No cheating though (-:!
 
 
 # How to help
+First and foremost: Help us find a good name!
+
 If you have cool level ideas, we would love a pull request!
 
 But more importantly we would be really interested in improving the explanation and theoretical footings. If you are knowledgeable in didactics and/or epistemology, we would love to hear your suggestions for improvement.
+
+# Possible Roadmap
+[ ] put marimo in app mode
+[ ] put the observer levels on the web
+[ ] more languages
+[ ] better level difficulty (and preknowledge) management to make it actually accesible for people that might find this interesting
