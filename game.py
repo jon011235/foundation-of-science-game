@@ -4,6 +4,7 @@
 # The main technical question for me right now whether it would be possible to open a python REPL with the context of the given level so that it can be explored automatically
 from terminal_interface import CLI
 from game_backend import Euclidean, Elevator, SimpleTime, Spherical
+from smt_backend import ElevatorSMTWrapper
 
 # TODO for wintercamp: In German + in Grad nicht in rad
 print("Welcome to this game, the idea is to give some intuition about how scientific progress, in the sense of creating models of the world around us works")
@@ -21,7 +22,7 @@ cli.start()
 
 print("Well done! Please give us feedback on this projects github game and write some fun levels for others to play")
 # Elevator Level
-cli = CLI(Elevator())
+cli = CLI(ElevatorSMTWrapper())
 cli.start()
 
 # time level
