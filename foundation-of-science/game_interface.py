@@ -50,7 +50,7 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(mo, custom_code):
     from pyodide.http import open_url
     from importlib.util import spec_from_loader, module_from_spec
     import base64
@@ -260,9 +260,9 @@ def _(get_history, get_lvl, np):
             ))
             fig.update_layout(
                 scene=dict(
-                    xaxis=dict(range=[-10, 10], autorange=False),
-                    yaxis=dict(range=[-10, 10], autorange=False),
-                    zaxis=dict(range=[-10, 10], autorange=False),
+                    xaxis=dict(range=[-10, 10], autorange=True),
+                    yaxis=dict(range=[-10, 10], autorange=True),
+                    zaxis=dict(range=[-10, 10], autorange=True),
                     aspectmode='manual',
                     aspectratio=dict(x=1, y=1, z=1),
                     camera=dict(eye=dict(x=1.5, y=1, z=.5))
@@ -287,8 +287,8 @@ def _(get_history, get_lvl, np):
                 marker=dict(size=10, color='red'),
             ))
             fig.update_layout(
-                xaxis=dict(range=[-10, 10], autorange=False),
-                yaxis=dict(range=[-10, 10], autorange=False),
+                xaxis=dict(range=[-10, 10], autorange=True),
+                yaxis=dict(range=[-10, 10], autorange=True),
                 uirevision='constant_value',
                 margin=dict(l=0, r=0, b=0, t=0),
                 showlegend=False,

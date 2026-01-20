@@ -489,7 +489,6 @@ class EverythingRandom(Euclidean):
             max_seed = seed
         seed+=1
     """
-        
     
     def description(self):
         return """This level takes 2 dimensions as a movement and positionvector.
@@ -544,19 +543,22 @@ If we repeat experiments where we either can not control all influences or the e
     
     def check(self, model):
         save_position = self.position
+        try:
+            for i in range(100):
+                pos = np.float64(np.random.randint(-1000, 1000, 2))
+                magic = np.random.randint(0,2)
+                move = np.random.randint(-1000, 1000, 2)
+                self.position = pos.copy()
+                self.move(move, magic)
+                if not np.isclose(self.position, np.round(np.array(model(nparr_to_tuple(pos), nparr_to_tuple(move), magic)), 3)).all():
+                    self.position = save_position
+                    return False
+            
+            self.position = save_position
+            return True
+        finally:
+            self.position = save_position
 
-        for i in range(100):
-            pos = np.float64(np.random.randint(-1000, 1000, 2))
-            magic = np.random.randint(0,2)
-            move = np.random.randint(-1000, 1000, 2)
-            self.position = pos.copy()
-            self.move(move, magic)
-            if not np.isclose(self.position, np.round(np.array(model(nparr_to_tuple(pos), nparr_to_tuple(move), magic)), 3)).all():
-                self.position = save_position
-                return False
-        
-        self.position = save_position
-        return True
 
 
 class NObservation(Euclidean):

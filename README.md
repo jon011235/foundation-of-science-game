@@ -34,5 +34,4 @@ But more importantly we would be really interested in improving the explanation 
 [ ] more languages
 [ ] better level difficulty (and preknowledge) management to make it actually accesible for people that might find this interesting
 [ ] bonus feature: pagination to switch between different graphs and REPLs that are in different states
-[ ] a plot that scales when the position gets too large
 [ ] Bonus: Set cookies that enable the next levels?
