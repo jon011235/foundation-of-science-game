@@ -154,48 +154,51 @@ Or should we always be careful not to mistake the map for the mountain? That is,
 
     def check(self, model):
         save_position = self.position
+        try:
 
-        for i in range(100):
-            pos = np.random.randint(-1000, 1000, 3)
-            pos[2] = np.random.randint(0,2)
+            for i in range(100):
+                pos = np.random.randint(-1000, 1000, 3)
+                pos[2] = np.random.randint(0,2)
+                self.position = pos.copy()
+                move = np.random.randint(-1000, 1000, 2)
+                self.move(move)
+                if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
+                    self.position = save_position
+                    return False
+        
+            for i in range(100):
+                pos = np.random.randint(-10, 10, 3)
+                pos[2] = np.random.randint(0,2)
+                self.position = pos.copy()
+                move = np.random.randint(-10, 10, 2)
+                self.move(move)
+                if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
+                    self.position = save_position
+                    return False
+        
+            pos = [30, 20, 1]
             self.position = pos.copy()
-            move = np.random.randint(-1000, 1000, 2)
+            move = [-29, -18]
             self.move(move)
             if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
                 self.position = save_position
                 return False
-    
-        for i in range(100):
-            pos = np.random.randint(-10, 10, 3)
-            pos[2] = np.random.randint(0,2)
+        
+            pos = [30, 20, 0]
             self.position = pos.copy()
-            move = np.random.randint(-10, 10, 2)
+            move = [-29, -18]
             self.move(move)
             if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
                 self.position = save_position
                 return False
-    
-        pos = [30, 20, 1]
-        self.position = pos.copy()
-        move = [-29, -18]
-        self.move(move)
-        if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
-            self.position = save_position
-            return False
-    
-        pos = [30, 20, 0]
-        self.position = pos.copy()
-        move = [-29, -18]
-        self.move(move)
-        if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
-            self.position = save_position
-            return False
-    
-        # TODO can not test position at "check me out" and move 0 as this is not testable for user
-        # TODO wrong, they can stand still on that spot, but maybe hard to guess
+        
+            # TODO can not test position at "check me out" and move 0 as this is not testable for user
+            # TODO wrong, they can stand still on that spot, but maybe hard to guess
 
-        self.position = save_position
-        return True
+            self.position = save_position
+            return True
+        finally:
+            self.position = save_position
       
 
 class SimpleTime(Euclidean):
@@ -237,27 +240,29 @@ Or is it related to entropy? The [Second Law of Thermodynamics](https://en.wikip
     
     def check(self, model):
         save_position = self.position
+        try:
 
-        for i in range(100):
-            pos = np.random.randint(-1000, 1000, 3)
-            self.position = pos.copy()
-            move = np.random.randint(-1000, 1000, 2)
-            self.move(move)
-            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
-                self.position = save_position
-                return False
-        
-        for i in range(30):
-            pos = np.random.randint(-10, 10, 3)
-            self.position = pos.copy()
-            move = np.random.randint(-10, 10, 2)
-            self.move(move)
-            if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
-                self.position = save_position
-                return False
-        self.position = save_position
-        return True
-
+            for i in range(100):
+                pos = np.random.randint(-1000, 1000, 3)
+                self.position = pos.copy()
+                move = np.random.randint(-1000, 1000, 2)
+                self.move(move)
+                if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
+                    self.position = save_position
+                    return False
+            
+            for i in range(30):
+                pos = np.random.randint(-10, 10, 3)
+                self.position = pos.copy()
+                move = np.random.randint(-10, 10, 2)
+                self.move(move)
+                if nparr_to_tuple(self.position) != model(nparr_to_tuple(pos), nparr_to_tuple(move)):
+                    self.position = save_position
+                    return False
+            self.position = save_position
+            return True
+        finally:
+            self.position = save_position
 
 # As you can see: AI generated
 
@@ -432,40 +437,44 @@ This geometry is non-Euclidean. On a sphere, the sum of angles in a triangle is 
                 * the radius component equals `self.r` (within tolerance),
                 * the returned angles match the expected ones (tolerance 1e‑5).
         """
-        for _ in range(100):
-            # ----- random position -----
-            theta = np.random.uniform(0, 2 * np.pi)
-            phi   = np.random.uniform(0, np.pi)
-            pos_tuple = (theta, phi, self.r)
+        save_position = self.position
+        try:
+            for _ in range(100):
+                # ----- random position -----
+                theta = np.random.uniform(0, 2 * np.pi)
+                phi   = np.random.uniform(0, np.pi)
+                pos_tuple = (theta, phi, self.r)
 
-            # ----- random movement (Δθ, Δφ) -----
-            dtheta = np.random.uniform(-np.pi, np.pi)          # up to half‑circumference
-            dphi   = np.random.uniform(-np.pi / 2, np.pi / 2)   # avoid jumping over both poles at once
-            mov_tuple = (dtheta, dphi)
+                # ----- random movement (Δθ, Δφ) -----
+                dtheta = np.random.uniform(-np.pi, np.pi)          # up to half‑circumference
+                dphi   = np.random.uniform(-np.pi / 2, np.pi / 2)   # avoid jumping over both poles at once
+                mov_tuple = (dtheta, dphi)
 
-            # ----- expected new state -----
-            # copy current angles so the level isn’t polluted for the next loop
-            self.position[0], self.position[1] = theta, phi
-            self.move(np.array([dtheta, dphi]))
-            expected = (self.position[0], self.position[1], self.r)
+                # ----- expected new state -----
+                # copy current angles so the level isn’t polluted for the next loop
+                self.position[0], self.position[1] = theta, phi
+                self.move(np.array([dtheta, dphi]))
+                expected = (self.position[0], self.position[1], self.r)
 
-            # ----- model output -----
-            try:
-                out = model(pos_tuple, mov_tuple)
-            except Exception:
-                return False
+                # ----- model output -----
+                try:
+                    out = model(pos_tuple, mov_tuple)
+                except Exception:
+                    return False
 
-            # ----- validation -----
-            if not isinstance(out, (list, tuple)) or len(out) != 3:
-                return False
-            out_theta, out_phi, out_r = out
-            if not np.isclose(out_r, self.r, atol=1e-5):
-                return False
-            if not np.isclose(out_theta % (2*np.pi), expected[0] % (2*np.pi), atol=1e-5):
-                return False
-            if not np.isclose(out_phi, expected[1], atol=1e-5):
-                return False
-        return True
+                # ----- validation -----
+                if not isinstance(out, (list, tuple)) or len(out) != 3:
+                    return False
+                out_theta, out_phi, out_r = out
+                if not np.isclose(out_r, self.r, atol=1e-5):
+                    return False
+                if not np.isclose(out_theta % (2*np.pi), expected[0] % (2*np.pi), atol=1e-5):
+                    return False
+                if not np.isclose(out_phi, expected[1], atol=1e-5):
+                    return False
+            return True
+        finally:
+            self.position = save_position
 
 
 import random
@@ -639,41 +648,45 @@ class Observation(NObservation):
         # Test no observations there before
         save_observations = list(self.observations)
         save_position = self.position.copy()
+        try:
 
-        # Now test observation generation and persistence
-        for _ in range(500):
-            # pick a position that is not currently observed
-            p = (random.randint(0, 150), random.randint(0, 150))
-            if p in self.observations:
-                continue
+            # Now test observation generation and persistence
+            for _ in range(500):
+                # pick a position that is not currently observed
+                p = (random.randint(0, 150), random.randint(0, 150))
+                if p in self.observations:
+                    continue
 
-            # if magic != 0, model must not claim an observation at a previously empty spot
-            magic = random.randint(1, 3)
-            out = model(p, (0, 0), self.observations, magic)
-            if out[1] or set(self.observations) != set(out[2]):
-                self.observations = save_observations
-                self.position = save_position
-                return False
-
-            # with magic == 0 the model should report an observation
-            out = model(p, (0, 0), self.observations, 0)
-            if not out[1] or not p in out[2]:
-                self.observations = save_observations
-                self.position = save_position
-                return False
-
-            # subsequent queries (any magic) must report the observation exists (persistence)
-            for magic2 in (0, 1, 2, 3):
-                res = model(p, (0, 0), out[2], magic2)
-                if not res[1] or set(res[2]) != set(out[2]):
+                # if magic != 0, model must not claim an observation at a previously empty spot
+                magic = random.randint(1, 3)
+                out = model(p, (0, 0), self.observations, magic)
+                if out[1] or set(self.observations) != set(out[2]):
                     self.observations = save_observations
                     self.position = save_position
                     return False
 
+                # with magic == 0 the model should report an observation
+                out = model(p, (0, 0), self.observations, 0)
+                if not out[1] or not p in out[2]:
+                    self.observations = save_observations
+                    self.position = save_position
+                    return False
 
-        # restore and succeed
-        self.observations = save_observations
-        self.position = save_position
-        return True
+                # subsequent queries (any magic) must report the observation exists (persistence)
+                for magic2 in (0, 1, 2, 3):
+                    res = model(p, (0, 0), out[2], magic2)
+                    if not res[1] or set(res[2]) != set(out[2]):
+                        self.observations = save_observations
+                        self.position = save_position
+                        return False
+
+
+            # restore and succeed
+            self.observations = save_observations
+            self.position = save_position
+            return True
+        finally:
+            self.position = save_position
+            self.observations = save_observations
 
 

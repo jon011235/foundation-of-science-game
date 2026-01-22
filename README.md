@@ -30,8 +30,12 @@ If you have cool level ideas, we would love a pull request!
 But more importantly we would be really interested in improving the explanation and theoretical footings. If you are knowledgeable in didactics and/or epistemology, we would love to hear your suggestions for improvement.
 
 # Possible Roadmap
+[ ] rework about.md
+[ ] accordeon that explains how interact with the level programmaticly
+[ ] Tutorial
 [ ] put marimo in app mode (with grid for better overview and more effective hiding of the code)
 [ ] more languages
 [ ] better level difficulty (and preknowledge) management to make it actually accesible for people that might find this interesting
+[ ] Make the loading faster or add loading bar
 [ ] bonus feature: pagination to switch between different graphs and REPLs that are in different states
 [ ] Bonus: Set cookies that enable the next levels?
