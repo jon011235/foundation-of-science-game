@@ -105,6 +105,13 @@ To play, you are the scientist. You will need:
     </a>
 </div>
 
+<!--<div class="level-grid">
+    <a href="marimo/game_interface.html?level=NonUniqueODE" class="level-card">
+        <span class="level-name">Parabel</span>
+        <span class="level-meta">Just another x²?</span>
+    </a>
+</div>-->
+
 ### 🟠 Community & Custom
 *Play levels created by others.*
 

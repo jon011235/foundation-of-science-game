@@ -46,11 +46,11 @@ def _(mo):
         custom_code = None
 
     custom_code
-    return
+    return (custom_code,)
 
 
 @app.cell
-def _(mo, custom_code):
+def _(custom_code, mo):
     from pyodide.http import open_url
     from importlib.util import spec_from_loader, module_from_spec
     import base64
@@ -350,6 +350,30 @@ def _(get_repl_output, mo, repl_code, run_btn):
         run_btn,
         mo.md(f"```\n{get_repl_output()}\n```")
     ])
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    <details><summary>Quick reference</summary>
+    To see whether you model is successfull write it into the editor below and check the result at the bottom of the page
+
+     <ul class="acc-list">
+          <li>Move: <code>lvl.move(movement_vector)</code> (tuple of size given in typesignature in the Description below)</li>
+          <li>Save current position: <code>lvl.save_point("name")</code><</li>
+          <li>Measure angle: <code>lvl.measure_angle("left","right")</code> (both are saved point names)</li>
+          <li>Measure length: <code>lvl.measure_length("name")</code> (where "name" is a saved point)</li>
+          <li>Inspect state: <code>lvl.position</code>
+          <ul>
+              <li><code>lvl.dim</code></li>
+              <li><code>lvl.dim_move</code></li>
+              <li><code>lvl.known_points</code></li>
+          </ul>
+          </li>
+        </ul>
+    </details>
+    """)
     return
 
 
