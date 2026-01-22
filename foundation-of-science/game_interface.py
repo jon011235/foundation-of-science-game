@@ -27,8 +27,9 @@ def _():
 
 
 @app.cell
-async def _(micropip):
-    await micropip.install("plotly")
+async def _(micropip, mo):
+    with mo.status.spinner(title="Installing Plotly (this may take a while)..."):
+        await micropip.install("plotly")
     import plotly.express as px
     return
 
@@ -64,10 +65,11 @@ def _(custom_code, mo):
 
     # Hack to make it work both locally and on github pages
     base_url = "/marimo/game_backend.py"
-    try:
-        gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
-    except:
-        gb = _load_module_from_url("gb", base_url)
+    with mo.status.spinner(title="Loading game backend..."):
+        try:
+            gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
+        except:
+            gb = _load_module_from_url("gb", base_url)
 
     url_params = mo.query_params()
 
