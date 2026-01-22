@@ -80,6 +80,7 @@ class CLI:
   plot                 - plot visited positions (2D or 3D depending on dimension)
   check PATH           - load model from PATH (Python file with function model(position, movement))
                          and run level.check(model)
+  restart              - restart the level
   help                 - show this message
   exit | quit          - quit""")
         print(self.level.description())
@@ -198,6 +199,12 @@ class CLI:
         print("model check result:", ok)
         self.success = ok
 
+    def cmd_restart(self, args):
+        try:
+            self.level.restart()
+            print("level restarted")
+        except Exception as e:
+            print("error restarting the level:", e)
     def cmd_checksmt(self, args):
         if not isinstance(self.level, smtb.SMTLevelWrapper):
             print("error running SMT check: this level does not support SMT checking")
