@@ -67,6 +67,10 @@ To play, you are the scientist. You will need:
 - **Python**: Basic syntax and logic.
 - **NumPy**: Only needed later, but helpful from the beginning (i.e. `np.isclose`).
 
+### 🔁 Loading time
+
+The first time you open a level, loading time is usually significant; for subsequent levels, it should be much quicker.
+
 ---
 
 ### 🟢 Tutorial & Basics

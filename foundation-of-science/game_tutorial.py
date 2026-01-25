@@ -645,9 +645,9 @@ def _(TutState, mo, tut_state):
 
             After solving any level, you will get a short description, explaining the rationale of the world, as well as the "intended" solution.
 
-            This is also where the game starts to differ from the real world: when we come up with a real model, there is no way to be _certain_ it is correct. <a href="https://plato.stanford.edu/entries/hume/#CausInfeCritPhas" target="_blank">Regardless of how much we test the model</a>, it may be that at some point in the future, an experiment will prove it incorrect!
+            This is also where the game starts to differ significantly from the real world: when we come up with a real model, there is no way to be _certain_ it is correct. <a href="https://plato.stanford.edu/entries/hume/#CausInfeCritPhas" target="_blank">Regardless of how much we test the model</a>, it may be that at some point in the future, an experiment will prove it incorrect!
 
-            In any case, it's time to move on to the next level!"""),
+            In any case, it's time to <a href="../../">move on to the next level!</a>"""),
             kind="success"
         ))
     return
