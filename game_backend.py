@@ -65,15 +65,14 @@ class Euclidean(Level):
         self.known_points = {}
     
     def description(self):
-        return f"""This level takes {self.dim_move} values as a movementvector and
-        expects the model to take a {self.dim} sized tuple `position` and a {self.dim_move} sized tuple `movement_vector`.
-        It should return a {self.dim} sized tuple with the predicted new position.
+        return f"""This level expects the model to take a {self.dim}-sized tuple `position` and a {self.dim_move}-sized tuple `movement_vector`.
+        It should return a {self.dim}-sized tuple with the predicted new position.
         
-        So `model` should have type `model(position: Tuple[int, ...], movement: Tuple[int, ...]) -> Tuple[int, ...]`
+        That is, `model` should have type `model(position: Tuple[int, ...], movement: Tuple[int, ...]) -> Tuple[int, ...]`
         where the tuples have size {self.dim}, {self.dim_move} and {self.dim} respectively."""
     
     def solution_description(self):
-        return """This is just a normal [Euclidean](https://en.wikipedia.org/wiki/Euclidean_geometry) geometry that we are used to, from our normal lifes.
+        return """This is just a normal [Euclidean](https://en.wikipedia.org/wiki/Euclidean_geometry) geometry that we are used to, from our normal lives.
 A possible solution is:
 ```python
 def model(position, movement):
@@ -94,13 +93,13 @@ def model(position, movement):
     def save_point(self, name: str):
         self.known_points[name] = self.position.copy()
 
-    def measure_angle(self, left_point: str, right_point: str) -> int: # measuring the angle (in rad) between two points and the current position
+    def measure_angle(self, left_point: str, right_point: str) -> float: # measuring the angle (in rad) between two points and the current position
         a = self.known_points[left_point] - self.position
         b = self.known_points[right_point] - self.position
         return angle_between(a, b)
 
-    def measure_length(self, other_point) -> int:
-        return self.known_points[other_point]-self.position
+    def measure_length(self, other_point):
+        return np.linalg.norm(self.known_points[other_point]-self.position)
 
     def check(self, model):
         for i in range(100):

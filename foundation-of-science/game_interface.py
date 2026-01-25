@@ -4,7 +4,7 @@ A webinterface for simple levels that are 2 or 3 dimensional in movement and pos
 
 import marimo
 
-__generated_with = "0.19.2"
+__generated_with = "0.19.0"
 app = marimo.App()
 
 
@@ -45,9 +45,6 @@ def _(mo):
         )
     else:
         custom_code = None
-
-    custom_code
-    return (custom_code,)
 
 
 @app.cell
@@ -359,11 +356,11 @@ def _(get_repl_output, mo, repl_code, run_btn):
 def _(mo):
     mo.md(r"""
     <details><summary>Quick reference</summary>
-    To see whether you model is successfull write it into the editor below and check the result at the bottom of the page
+    To see whether you model is successful write it into the editor below and check the result at the bottom of the page
 
      <ul class="acc-list">
           <li>Move: <code>lvl.move(movement_vector)</code> (tuple of size given in typesignature in the Description below)</li>
-          <li>Save current position: <code>lvl.save_point("name")</code><</li>
+          <li>Save current position: <code>lvl.save_point("name")</code></li>
           <li>Measure angle: <code>lvl.measure_angle("left","right")</code> (both are saved point names)</li>
           <li>Measure length: <code>lvl.measure_length("name")</code> (where "name" is a saved point)</li>
           <li>Inspect state: <code>lvl.position</code>
