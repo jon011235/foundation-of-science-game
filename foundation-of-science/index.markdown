@@ -61,18 +61,21 @@ title: Foundation of Science
 </div>
 
 ### 🛠️ Prerequisites
+
 To play, you are the scientist. You will need:
--   **Python**: Basic syntax and logic.
--   **NumPy**: Only needed later, but helpful from the beginning (i.e. `np.isclose`).
+
+- **Python**: Basic syntax and logic.
+- **NumPy**: Only needed later, but helpful from the beginning (i.e. `np.isclose`).
 
 ---
 
 ### 🟢 Tutorial & Basics
-*Start here. Simple Introduction challenges.*
+
+_Start here. Simple Introduction challenges._
 
 <div class="level-grid">
-    <a href="marimo/game_interface.html?level=Euclidean" class="level-card">
-        <span class="level-name">Euclidean</span>
+    <a href="marimo/game_tutorial.html" class="level-card">
+        <span class="level-name">Euclidean (Tutorial)</span>
         <span class="level-meta">The familiar flat world.</span>
     </a>
     <a href="marimo/game_interface.html?level=Elevator" class="level-card">
@@ -86,7 +89,8 @@ To play, you are the scientist. You will need:
 </div>
 
 ### 🔵 Geometry Levels
-*Requires knowledge of trigonometry (sin, cos) and exponentials.*
+
+_Requires knowledge of trigonometry (sin, cos) and exponentials._
 
 <div class="level-grid">
     <a href="marimo/game_interface.html?level=Spherical" class="level-card">
@@ -96,7 +100,8 @@ To play, you are the scientist. You will need:
 </div>
 
 ### 🟣 Puzzle Levels
-*Logic puzzles disguised as physics.*
+
+_Logic puzzles disguised as physics._
 
 <div class="level-grid">
     <a href="marimo/game_interface.html?level=EverythingRandom" class="level-card">
@@ -113,7 +118,8 @@ To play, you are the scientist. You will need:
 </div>-->
 
 ### 🟠 Community & Custom
-*Play levels created by others.*
+
+_Play levels created by others._
 
 <div class="level-grid">
     <a href="marimo/game_interface.html?custom=true" class="level-card" style="border-left: 4px solid #ffc107;">

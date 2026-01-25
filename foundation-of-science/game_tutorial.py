@@ -52,6 +52,8 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    # FOR LOCAL EDITING,
+    # -------> COMMENT FROM HERE
     from pyodide.http import open_url
     from importlib.util import spec_from_loader, module_from_spec
     import base64
@@ -70,7 +72,9 @@ def _(mo):
             gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
         except:
             gb = _load_module_from_url("gb", base_url)
+    # <------- UNTIL HERE
 
+    # AND UNCOMMNET THE FOLLOWING LINE
     # import game_backend as gb
 
     currentLevel = gb.Euclidean
@@ -125,19 +129,11 @@ def _(get_lvl, get_tut_state):
 
 
 @app.cell
-def _(lvl, mo):
-    try:
-        quote = lvl.quote()
-    except:
-        quote = ""
-    mo.md(quote)
-    return
-
-
-@app.cell
 def _(mo):
     mo.md(f"""
-    ## Tutorial
+    # Euclidean (Tutorial)
+
+    _There is no royal road to geometry._ -- Euclid
 
     This first level will be a walk through the base mechanics of the game.
 
