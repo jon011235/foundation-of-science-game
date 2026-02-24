@@ -30,9 +30,15 @@ If you have cool level ideas, we would love a pull request!
 But more importantly we would be really interested in improving the explanation and theoretical footings. If you are knowledgeable in didactics and/or epistemology, we would love to hear your suggestions for improvement.
 
 # Possible Roadmap
-[ ] Tutorial
+[x] Tutorial
 [ ] put marimo in app mode (with grid for better overview and more effective hiding of the code)
 [ ] more languages
 [ ] better level difficulty (and preknowledge) management to make it actually accesible for people that might find this interesting
 [ ] bonus feature: pagination to switch between different graphs and REPLs that are in different states
 [ ] Bonus: Set cookies that enable the next levels?
+
+## More TODOs:
+- favicon
+- plotting def. must be worked on, it looks as if there is no change when you move (unless you pay close attention to the axes); I think it would be best to have something like coords fixed to -10; 10, but if you leave that box, make the coords -20; 20, after -30; 30 (and back to -10; 10 if you move  back into the -10; 10 box); an LLM should be able to fix this
+- Make tutorial and level controls consistent.
+- there are some small changes to the code which could me made (there are a lot of "lvl1" and "lvl2" which are not needed)
