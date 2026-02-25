@@ -54,6 +54,29 @@ def _(mo):
     return
 
 
+
+
+@app.cell(hide_code=True)
+def _():
+        import marimo as mo
+        mo.md(r"""
+        <script>
+        (function(){
+            try{
+                var l=document.querySelector('link[rel~="icon"]');
+                if(!l){
+                    l=document.createElement('link');
+                    l.rel='icon';
+                    l.href='/favicon.ico';
+                    document.head.appendChild(l);
+                } else { l.href='/favicon.ico'; }
+            }catch(e){}
+        })();
+        </script>
+        """)
+        return
+
+
 @app.cell
 def _():
     # FOR LOCAL EDITING,

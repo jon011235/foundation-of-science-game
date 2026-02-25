@@ -47,3 +47,9 @@ But more importantly we would be really interested in improving the explanation 
 - [ ] plotting def. must be worked on, it looks as if there is no change when you move (unless you pay close attention to the axes); I think it would be best to have something like coords fixed to -10; 10, but if you leave that box, make the coords -20; 20, after -30; 30 (and back to -10; 10 if you move back into the -10; 10 box); an LLM should be able to fix this
 - [x] Make tutorial and level controls consistent.
 - [x] there are some small changes to the code which could me made (there are a lot of "lvl1" and "lvl2" which are not needed)
+- eel 
+- add my level
+- z3-online?
+
+## Sources
+Favicon: https://openclipart.org/detail/323344/puzzle-piece
