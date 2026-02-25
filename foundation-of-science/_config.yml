@@ -23,7 +23,7 @@ description: >- # this means to ignore newlines until "baseurl:"
   A website about possible problems when trying to predict a scenario.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-github_username:  jon011235
+github_username: jon011235
 
 # Build settings
 theme: minima

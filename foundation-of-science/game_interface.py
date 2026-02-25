@@ -45,6 +45,7 @@ def _(mo):
         )
     else:
         custom_code = None
+    return (custom_code,)
 
 
 @app.cell
@@ -76,8 +77,9 @@ def _(custom_code, mo):
         currentLevel = ns["Level"]
     else:
         exec(f"currentLevel = gb.{url_params['level']}") 
+
     # import game_backend as gb
-    # currentLevel = gb.EverythingRandom
+    # currentLevel = gb.Euclidean
     return (currentLevel,)
 
 
@@ -130,10 +132,10 @@ def _(mo):
 
 @app.cell
 def _(currentLevel, get_history, get_lvl, mo, save_name, set_history, set_lvl):
-    # Define move_inputs first so it is available for clojure
+    # Define move_inputs first so it is available for closure
     curr_lvl = get_lvl()
     move_inputs = [
-        mo.ui.number(label=f"Move {axis}:")
+        mo.ui.number(label=f"Move {axis}:", value=0.0, full_width=True)
         for axis in "XYZ"[:curr_lvl.dim_move]
     ]
 
@@ -161,15 +163,24 @@ def _(currentLevel, get_history, get_lvl, mo, save_name, set_history, set_lvl):
         pts_copy = copy.deepcopy(curr_lvl.known_points)
         hist.append(pts_copy)
         set_history(hist)
-        set_lvl(currentLevel())
+
+        pts = dict()
+        for past_pts in hist:
+            pts = pts | past_pts
+        curr_lvl = currentLevel()
+        curr_lvl.known_points = pts
+        set_lvl(curr_lvl)
 
     def reset_plot_click(value):
+        curr_lvl = get_lvl()
+        curr_lvl.known_points = dict()
+        set_lvl(curr_lvl)
         set_history([])
 
     move_btn = mo.ui.button(label="Move", on_click=move_btn_click)
     save_btn = mo.ui.button(label="Save", on_click=save_btn_click)
     reset_lvl_btn = mo.ui.button(label="Reset Level", on_click=reset_lvl_click)
-    reset_plot_btn = mo.ui.button(label="Reset old points", on_click=reset_plot_click)
+    reset_plot_btn = mo.ui.button(label="Reset Points", on_click=reset_plot_click)
     return move_btn, move_inputs, reset_lvl_btn, reset_plot_btn, save_btn
 
 
@@ -180,15 +191,33 @@ def _(mo):
 
 
 @app.cell
-def _(get_lvl, mo):
-    lvl0 = get_lvl()
-    pos_str = ", ".join([str(x) for x in lvl0.position])
+def _(lvl, mo):
+    pos_str = ", ".join([str(x) for x in lvl.position])
     position = mo.md(f"""Current position: `[{pos_str}]`""")
     return (position,)
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _(lvl, mo):
+    dist_to_pnt = mo.ui.dropdown(options=lvl.known_points.keys())
+
+    def dist_str_to_dropdown_pnt(name):
+        try:
+            return f"~{lvl.measure_length(name):.2f}"
+        except:
+            return "NaN"
+    return dist_str_to_dropdown_pnt, dist_to_pnt
+
+
+@app.cell
+def _(dist_str_to_dropdown_pnt, dist_to_pnt, mo):
+    dist_to_pnt_md = mo.md(f"Distance to {dist_to_pnt} is {dist_str_to_dropdown_pnt(dist_to_pnt.value)}")
+    return (dist_to_pnt_md,)
+
+
+@app.cell
 def _(
+    dist_to_pnt_md,
     mo,
     move_btn,
     move_inputs,
@@ -198,16 +227,24 @@ def _(
     save_btn,
     save_name,
 ):
-    stack = mo.vstack([*move_inputs, move_btn], align="start")
-    mo.hstack([
-        stack,
-        mo.vstack([position, save_name, save_btn], align="start"),
-        mo.vstack([reset_lvl_btn, reset_plot_btn], align="start")
-    ])
+    mv_stack = mo.vstack([*move_inputs, move_btn], align="start", justify="space-between")
+    save_stack = mo.vstack([save_name, save_btn], align="start")
+    reset_stack = mo.vstack([save_name, save_btn, dist_to_pnt_md, reset_lvl_btn, reset_plot_btn], align="start")
+
+    mo.vstack(
+        [
+            position,
+            mo.hstack([
+                mv_stack,
+                reset_stack,
+            ], gap=3)
+        ],
+        align="center"
+    )
     return
 
 
-@app.cell(hide_code=True)
+@app.cell(disabled=True, hide_code=True)
 def _(get_history, get_lvl, np):
     import plotly.graph_objects as go
     lvl3 = get_lvl()
@@ -356,15 +393,14 @@ def _(get_repl_output, mo, repl_code, run_btn):
 def _(mo):
     mo.md(r"""
     <details><summary>Quick reference</summary>
-    To see whether you model is successful write it into the editor below and check the result at the bottom of the page
-
      <ul class="acc-list">
           <li>Move: <code>lvl.move(movement_vector)</code> (tuple of size given in typesignature in the Description below)</li>
           <li>Save current position: <code>lvl.save_point("name")</code></li>
           <li>Measure angle: <code>lvl.measure_angle("left","right")</code> (both are saved point names)</li>
           <li>Measure length: <code>lvl.measure_length("name")</code> (where "name" is a saved point)</li>
-          <li>Inspect state: <code>lvl.position</code>
+          <li>Inspect state:
           <ul>
+              <li><code>lvl.position</code></li>
               <li><code>lvl.dim</code></li>
               <li><code>lvl.dim_move</code></li>
               <li><code>lvl.known_points</code></li>
@@ -401,8 +437,7 @@ def _(mo):
 
 
 @app.cell
-def _(get_lvl, mo, user_code):
-    lvl1 = get_lvl()
+def _(lvl, mo, user_code):
     def run_user_validation(code_string, check):
         namespace = {}
         # TODO Validate more of how the function has to be (tuple length etc) before passing to validation
@@ -420,14 +455,15 @@ def _(get_lvl, mo, user_code):
             success = check(user_model)
 
             if success:
-                return mo.md(f"✅ **Success**!: Your model correctly predicts the level's behavior.\n\n {lvl1.solution_description()}")
+                user_code = code_string
+                return mo.md(f"✅ **Success**: Your model correctly predicts the level's behavior.\n\n {lvl.solution_description()}")
             else:
                 return mo.md("❌ **Validation Failed**: The model did not return the expected values for random trials.")
 
         except Exception as e:
             return mo.md(f"🛑 **Syntax or Runtime Error**: `{type(e).__name__}: {str(e)}`")
 
-    validation_result = run_user_validation(user_code.value, lvl1.check)
+    validation_result = run_user_validation(user_code.value, lvl.check)
     validation_result
     return
 

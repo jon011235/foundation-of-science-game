@@ -4,25 +4,28 @@ A webinterface for simple levels that are 2 or 3 dimensional in movement and pos
 
 import marimo
 
-__generated_with = "0.19.0"
+__generated_with = "0.20.2"
 app = marimo.App()
 
 
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
 @app.cell
 def _():
     import numpy as np
+
     return (np,)
 
 
 @app.cell
 def _():
     import micropip
+
     return (micropip,)
 
 
@@ -31,6 +34,7 @@ async def _(micropip, mo):
     with mo.status.spinner(title="Installing Plotly (this may take a while)..."):
         await micropip.install("plotly")
     import plotly.express as px
+
     return
 
 
@@ -51,31 +55,31 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
+def _():
     # FOR LOCAL EDITING,
     # -------> COMMENT FROM HERE
-    from pyodide.http import open_url
-    from importlib.util import spec_from_loader, module_from_spec
-    import base64
+    # from pyodide.http import open_url
+    # from importlib.util import spec_from_loader, module_from_spec
+    # import base64
 
-    def _load_module_from_url(name: str, url: str):
-        code = open_url(url).read()
-        module_spec = spec_from_loader(name, loader=None)
-        module = module_from_spec(module_spec)
-        exec(code, module.__dict__)
-        return module
+    # def _load_module_from_url(name: str, url: str):
+    #     code = open_url(url).read()
+    #     module_spec = spec_from_loader(name, loader=None)
+    #     module = module_from_spec(module_spec)
+    #     exec(code, module.__dict__)
+    #     return module
 
-    # Hack to make it work both locally and on github pages
-    base_url = "/marimo/game_backend.py"
-    with mo.status.spinner(title="Loading game backend..."):
-        try:
-            gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
-        except:
-            gb = _load_module_from_url("gb", base_url)
+    # # Hack to make it work both locally and on github pages
+    # base_url = "/marimo/game_backend.py"
+    # with mo.status.spinner(title="Loading game backend..."):
+    #     try:
+    #         gb = _load_module_from_url("gb", "/foundation-of-science-game"+base_url)
+    #     except:
+    #         gb = _load_module_from_url("gb", base_url)
     # <------- UNTIL HERE
 
     # AND UNCOMMNET THE FOLLOWING LINE
-    # import game_backend as gb
+    import game_backend as gb
 
     currentLevel = gb.Euclidean
     return (currentLevel,)
@@ -93,6 +97,7 @@ def _():
         RESETTED = 5
         RUN_CODE = 6
         SOLVED = 7
+
     return (TutState,)
 
 
@@ -361,6 +366,7 @@ def _(lvl, mo):
             return f"~{lvl.measure_length(name):.2f}"
         except:
             return "NaN"
+
     return dist_str_to_dropdown_pnt, dist_to_pnt
 
 
@@ -619,7 +625,7 @@ def _(TutState, get_tut_state, lvl, mo, set_tut_state, user_code):
                 curr_state = get_tut_state()
                 if curr_state < TutState.SOLVED: set_tut_state(TutState.SOLVED)
                 user_code = code_string
-                return mo.md(f"✅ **Success**!: Your model correctly predicts the level's behavior.\n\n {lvl.solution_description()}")
+                return mo.md(f"✅ **Success**: Your model correctly predicts the level's behavior.\n\n {lvl.solution_description()}")
             else:
                 return mo.md("❌ **Validation Failed**: The model did not return the expected values for random trials.")
 
