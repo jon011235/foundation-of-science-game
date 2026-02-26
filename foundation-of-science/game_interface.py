@@ -4,28 +4,9 @@ A webinterface for simple levels that are 2 or 3 dimensional in movement and pos
 
 import marimo
 
-__generated_with = "0.19.0"
+__generated_with = "0.19.2"
 app = marimo.App()
 
-@app.cell(hide_code=True)
-def _():
-        import marimo as mo
-        mo.md(r"""
-        <script>
-        (function(){
-            try{
-                var l=document.querySelector('link[rel~="icon"]');
-                if(!l){
-                    l=document.createElement('link');
-                    l.rel='icon';
-                    l.href='/favicon.ico';
-                    document.head.appendChild(l);
-                } else { l.href='/favicon.ico'; }
-            }catch(e){}
-        })();
-        </script>
-        """)
-        return
 
 @app.cell
 def _():
@@ -263,27 +244,15 @@ def _(
     return
 
 
-@app.cell(disabled=True, hide_code=True)
+@app.cell(hide_code=True)
 def _(get_history, get_lvl, np):
     import plotly.graph_objects as go
     lvl3 = get_lvl()
     history = get_history()
 
     def get_dynamic_range(value):
-        """Determine the appropriate axis range based on the current position value.
-        
-        Returns fixed ranges that expand as you move further away:
-        - [-10, 10] if position is within this range
-        - [-20, 20] if position is within this range
-        - [-30, 30] if position is beyond [-20, 20]
-        """
-        abs_val = abs(value)
-        if abs_val <= 10:
-            return [-10, 10]
-        elif abs_val <= 20:
-            return [-20, 20]
-        else:
-            return [-30, 30]
+        range = (abs(value)//10+1)*10
+        return [-range, range]
 
     def create_plot(lvl, history):
         points_dict = lvl.known_points
@@ -294,9 +263,7 @@ def _(get_history, get_lvl, np):
         fig = go.Figure()
 
         # Determine axis ranges based on current position
-        x_range = get_dynamic_range(pos[0])
-        y_range = get_dynamic_range(pos[1])
-        z_range = get_dynamic_range(pos[2]) if len(pos) > 2 else [-10, 10]
+        range = get_dynamic_range(max(pos))
 
         # Plot history
         for hist_pts_dict in history:
@@ -336,9 +303,9 @@ def _(get_history, get_lvl, np):
             ))
             fig.update_layout(
                 scene=dict(
-                    xaxis=dict(range=x_range, autorange=False),
-                    yaxis=dict(range=y_range, autorange=False),
-                    zaxis=dict(range=z_range, autorange=False),
+                    xaxis=dict(range=range, autorange=False),
+                    yaxis=dict(range=range, autorange=False),
+                    zaxis=dict(range=range, autorange=False),
                     aspectmode='manual',
                     aspectratio=dict(x=1, y=1, z=1),
                     camera=dict(eye=dict(x=1.5, y=1, z=.5))
@@ -363,8 +330,8 @@ def _(get_history, get_lvl, np):
                 marker=dict(size=10, color='red'),
             ))
             fig.update_layout(
-                xaxis=dict(range=x_range, autorange=False),
-                yaxis=dict(range=y_range, autorange=False),
+                xaxis=dict(range=range, autorange=False),
+                yaxis=dict(range=range, autorange=False),
                 uirevision='constant_value',
                 margin=dict(l=0, r=0, b=0, t=0),
                 showlegend=False,
