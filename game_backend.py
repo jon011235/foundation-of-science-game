@@ -666,17 +666,34 @@ class NObservation(Euclidean):
         super().__init__(2, 2)
 
     def observe(self):
-        return self.position in self.observations
+        return tuple(self.position) in self.observations
 
 
     def description(self):
-        return """This level takes 2 dimensions as a movement and positionvector.
+        return """This level uses 2D position and 2D movement.
+Your model also receives `objects`, a list of known observable positions.
 
-        This level allows to observe stuff, we already looked around in the world for a bit and will give you those things using the objects lists (a list with the position of the objects in 2d space)
-        As a new thing please also return, whether there is something to be observed at the place where you are after the movement
+Return:
+1) the new position after movement,
+2) whether that new position is in `objects`,
+3) the `objects` list.
 
-        So model should have type model(position: Tuple[int, int], movement: Tuple[int, int], objects: List(Tuple[int, int])) -> (Tuple[int, int], Bool)"""
-    
+Type:
+model(position: Tuple[int, int], movement: Tuple[int, int], objects: List[Tuple[int, int]]) -> Tuple[Tuple[int, int], bool, List[Tuple[int, int]]]"""
+
+    def solution_description(self):
+        return """A correct model keeps ordinary 2D movement and checks membership in `objects`.
+
+A possible solution is:
+```python
+def model(position, movement, objects):
+    new_pos = tuple((position[0] + movement[0], position[1] + movement[1]))
+    observed = new_pos in objects
+    return (new_pos, observed, objects)
+```
+"""
+
+
     def quote(self):
         return r"""
     # NObservation
@@ -691,10 +708,12 @@ class NObservation(Euclidean):
         if not super().check(model_curried):
             return False
         
+        
         for i in range(100):
-            p = (random.randint(0, 150) for i in range(2))
+            p = tuple((random.randint(0, 150) for i in range(2)))
             result = model(p, (0,0), self.observations)
-            if p in self.observations != result[1] or self.observations != result[2]:
+            if (p in self.observations) != result[1] or self.observations != result[2]:
+                print(p, result[:2], p in self.observations, self.observations!= result[2])
                 # print(p in self.observations, p, model(p, (0,0), self.observations)[:3])
                 return False
         return True
@@ -708,15 +727,19 @@ class Observation(NObservation):
         
     
     def description(self):
-        return """This level takes 2 dimensions as a movement and positionvector.
+        return """This level extends NObservation with a `magic` value in {0,1,2,3}.
 
-        This level allows to observe stuff, we already looked around in the world for a bit and will give you those things using the objects list (a list with the position of the objects in 2d space).
-        As a new thing please also return, whether there is something to be observed at the place where you are after the movement. Also return the observations you made
+If `magic == 0`, the current position is added to observations.
+Otherwise, observations stay unchanged.
 
-        Differently to the previous level your model should take in a magic number between 0 and 3
+Return:
+1) the new position after movement,
+2) whether the new position is observed,
+3) the observations list.
 
-        so model should have type model(position: List(int), movement: List(int), objects: List(List(int)), magic: int) -> (List(int), Bool, List(List(int)))"""
-    
+Type:
+model(position: Tuple[int, int], movement: Tuple[int, int], objects: List[Tuple[int, int]], magic: int) -> Tuple[Tuple[int, int], bool, List[Tuple[int, int]]]"""
+
     # TODO they need to reverse basically exact this function... Do you have a better idea @andcov?
     def observe(self, magic=None):
         if magic is None:
@@ -726,13 +749,39 @@ class Observation(NObservation):
             return True
         else: return False
     
+    def solution_description(self):
+        return """This level adds "quantum" stuff (if you want to use such a big and ill-used word) to the world. The observations change based on your movement, in particular they can only come into existence upon observations (when you move there) (simulated by `magic == 0`).
+
+This once again shows us, that we always have to consider that we are part of the system we want to observe.
+
+A possible solution is:
+```python
+def model(position, movement, objects, magic):
+    new_pos = (position[0] + movement[0], position[1] + movement[1])
+
+    # copy to avoid mutating caller-owned data
+    new_objects = list(objects)
+    if magic == 0 and new_pos not in new_objects:
+        new_objects.append(new_pos)
+
+    observed = new_pos in new_objects
+    return (new_pos, observed, new_objects)
+```
+"""
+
+    def quote(self):
+        return r"""
+    # Observation
+    _Chance favors the prepared mind._
+    -- Louis Pasteur
+    """
+
     def check(self, model):
         def model_curried(a, b, c):
             return  model(a,b, c, 1)
         if not super().check(model_curried): # super = Nobservation
             return False
         
-
         # Test no observations there before
         save_observations = list(self.observations)
         save_position = self.position.copy()
@@ -741,7 +790,7 @@ class Observation(NObservation):
             # Now test observation generation and persistence
             for _ in range(500):
                 # pick a position that is not currently observed
-                p = (random.randint(0, 150), random.randint(0, 150))
+                p = tuple((random.randint(0, 150), random.randint(0, 150)))
                 if p in self.observations:
                     continue
 

@@ -114,6 +114,21 @@ _Logic puzzles disguised as physics._
     </a>
 </div>
 
+### 🟡 Observation Levels
+
+_Levels with explicit observation mechanics._
+
+<div class="level-grid">
+    <a href="marimo/game_interface_obs.html?level=NObservation" class="level-card">
+        <span class="level-name">NObservation</span>
+        <span class="level-meta">Fixed observable objects in 2D.</span>
+    </a>
+    <a href="marimo/game_interface_obs.html?level=Observation" class="level-card">
+        <span class="level-name">Observation</span>
+        <span class="level-meta">Observations can change when you look closely enough.</span>
+    </a>
+</div>
+
 <!--<div class="level-grid">
     <a href="marimo/game_interface.html?level=NonUniqueODE" class="level-card">
         <span class="level-name">Parabel</span>
