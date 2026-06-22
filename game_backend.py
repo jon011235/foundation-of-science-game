@@ -143,7 +143,10 @@ It has been pointed out that maths is [unreasonably effective](https://en.wikipe
 Or should we always be careful not to mistake the map for the mountain? That is, (mathematical) models are useful as "maps" in as much as they predict how the world functions (i.e. show us the way through the mountains). But we should put little trust in maps of uncharted territories. Even if an elegant mathematical theory predicts some theoretical outcomes, should we only trust in it once we observe it empirically?"""
     
     def quote(self):
-        return r"""_Ever heard of a wormhole?_"""
+        return r"""
+        # Elevator
+        _Ever heard of a wormhole?_
+        """
 
     def move(self, movement_vector: np.ndarray):
         self.position += np.append(movement_vector, 0)
@@ -230,6 +233,7 @@ Or is it related to entropy? The [Second Law of Thermodynamics](https://en.wikip
 
     def quote(self):
         return r"""
+    # SimpleTime
     _The distinction between the past, present and future is only a stubbornly persistent illusion._
     -- Albert Einstein
     """
@@ -521,7 +525,10 @@ def model(position, movement):
 """
 
     def quote(self):
-        return r"""_Going round and round!"""
+        return r"""
+    # Unit Circle
+    _Going round and round!_
+    """
 
     def move(self, movement_coords: np.ndarray):
         movement_coords = np.array(movement_coords)
@@ -637,7 +644,10 @@ def model(position, movement):
 """
 
     def quote(self):
-        return r"""_Ok, I'm getting dizzy..._"""
+        return r"""
+    # Unit Sphere
+    _Ok, I'm getting dizzy..._
+    """
 
     def move(self, movement_coords: np.ndarray):
         movement_coords = np.array(movement_coords)

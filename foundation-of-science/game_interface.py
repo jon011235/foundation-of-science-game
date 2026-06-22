@@ -123,7 +123,7 @@ def _(lvl, mo):
 @app.cell
 def _(mo):
     mo.md(r"""
-    [← Go back](https://jon011235.github.io/foundation-of-science-game/)
+    <a href="https://jon011235.github.io/foundation-of-science-game/">← Go back (all work will be discarded)</a>
     """)
     return
 

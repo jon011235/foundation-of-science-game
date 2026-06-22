@@ -135,18 +135,19 @@ def _(mo):
 
     _There is no royal road to geometry._ -- Euclid
 
+    <a href="https://jon011235.github.io/foundation-of-science-game/">← Go back (all work will be discarded)</a>
+    
     This first level will be a walk through the base mechanics of the game.
 
     ### A ~~short~~ philosophical introduction
 
     (if you just want to play, you may skip to _The mechanics of the game_)
 
-    Over the past century, humanity has lived through a scientific revolution. It is awe-inspiring to look back and see how much we have achieved in a short 100 years. At the beginning of the 20th century, we had little idea of what the age of Earth is, no idea what plate tectonics are, and could not fathom that chickens are direct descendents of Mesozoic Era dinasours. We have landed on the Moon, developed vaccines and laid cables across ocean floors that allow for near-instantaneous communication. Most importantly, we now know <a href="https://www.reddit.com/r/todayilearned/comments/1gxcdtc/til_before_2022_it_was_unknown_how_eels_reproduced/" target="_blank">how eels reproduce</a>.
+    Over the past century, humanity has lived through a scientific revolution. It is awe-inspiring to look back and see how much we have achieved in a short 100 years. At the beginning of the 20th century, we had little idea of what the age of Earth is, no idea what plate tectonics are, and could not fathom that chickens are direct descendents of Mesozoic Era dinosaurs. We have landed on the Moon, developed vaccines and laid cables across ocean floors that allow for near-instantaneous communication. Most importantly, we now know <a href="https://www.reddit.com/r/todayilearned/comments/1gxcdtc/til_before_2022_it_was_unknown_how_eels_reproduced/" target="_blank">how eels reproduce</a>.
 
+    We are brought up in a society where the capital-S institution of Science is ingrained in everyday life. Besides the technology that surrounds us, how often do we not hear "you know, I heard scientists have discovered X". Because of Science's prevalence however, we rarely stop and ask: who are the scientists that discovered X? How did they discover X?
 
-    We are brought up in a society where the capital-S instituion of Science is ingrained in everyday life. Besides the technology that surrounds us, how often do we not hear "you know, I heard scientists have discovered X". Because of Science's prevelance however, we rarely stop and ask: who are the scientists that discovered X? How did they discover X?
-
-    As we dig deeper into science and its foundations, we quickly run into fundamental philosophical questions. What can be _known_ about the surrounding world? How can information about the world be aquired, and to what degree can it be trusted?
+    As we dig deeper into science and its foundations, we quickly run into fundamental philosophical questions. What can be _known_ about the surrounding world? How can information about the world be acquired, and to what degree can it be trusted?
 
     In philosophy, such questions are brought together under the field of <a href="https://en.wikipedia.org/wiki/Epistemology" target="_blank"><i>epistemology</i></a>. Debates over epistemological beliefs have been going on for centuries.
 
