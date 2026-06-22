@@ -151,7 +151,7 @@ def _(mo):
 
     In philosophy, such questions are brought together under the field of <a href="https://en.wikipedia.org/wiki/Epistemology" target="_blank"><i>epistemology</i></a>. Debates over epistemological beliefs have been going on for centuries.
 
-    These debates have naturally spilled over into the _philosophy of science_. Take a second and ask yourself: what is science? What is its purpose? What are its methods? The more one considers these questions, the murkier the answers become. If you are able to give a concrete answer to any of the questions, try to think of a field of science where the
+    These debates have naturally spilled over into the _philosophy of science_. Take a second and ask yourself: what is science? What is its purpose? What are its methods? The more one considers these questions, the murkier the answers become. If you are able to give a concrete answer to any of the questions, try to think of a field of science that may not fit neatly into your definition.
 
     This game will try to give you a feeling for how science works, at its most fundamental level. Note that the game will _not_ provide answers to the aforementioned questions. In fact, the purpose of the game is to immerse you in the uncertainty at the foundations of science. To get you to think about science in a new way, and to ask many questions: often enough, a well-posed question is worth more than the answer.
 
