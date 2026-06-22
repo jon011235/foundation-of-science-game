@@ -42,7 +42,10 @@ But more importantly we would be really interested in improving the explanation 
 - [ ] Bonus: Set cookies that enable the next levels?
 
 ## More TODOs:
-- z3-online?
+
+- [ ] reset level after reset points does not add default points back (e.g. in Elevator level)
+- [ ] z3-online?
 
 ## Sources
+
 Favicon: https://openclipart.org/detail/323344/puzzle-piece

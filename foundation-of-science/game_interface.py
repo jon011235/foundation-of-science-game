@@ -4,7 +4,7 @@ A webinterface for simple levels that are 2 or 3 dimensional in movement and pos
 
 import marimo
 
-__generated_with = "0.19.2"
+__generated_with = "0.19.0"
 app = marimo.App()
 
 
@@ -79,7 +79,7 @@ def _(custom_code, mo):
         exec(f"currentLevel = gb.{url_params['level']}") 
 
     # import game_backend as gb
-    # currentLevel = gb.Euclidean
+    # currentLevel = gb.UnitSphere
     return (currentLevel,)
 
 
@@ -117,6 +117,14 @@ def _(lvl, mo):
     except:
         quote = ""
     mo.md(quote)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    [← Go back](https://jon011235.github.io/foundation-of-science-game/)
+    """)
     return
 
 
@@ -251,7 +259,7 @@ def _(get_history, get_lvl, np):
     history = get_history()
 
     def get_dynamic_range(value):
-        range = (abs(value)//10+1)*10
+        range = (abs(value)//3+1)*3
         return [-range, range]
 
     def create_plot(lvl, history):

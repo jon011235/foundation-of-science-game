@@ -143,10 +143,7 @@ It has been pointed out that maths is [unreasonably effective](https://en.wikipe
 Or should we always be careful not to mistake the map for the mountain? That is, (mathematical) models are useful as "maps" in as much as they predict how the world functions (i.e. show us the way through the mountains). But we should put little trust in maps of uncharted territories. Even if an elegant mathematical theory predicts some theoretical outcomes, should we only trust in it once we observe it empirically?"""
     
     def quote(self):
-        return r"""
-    # Elevator
-    _Ever heard of a wormhole?_
-    """
+        return r"""_Ever heard of a wormhole?_"""
 
     def move(self, movement_vector: np.ndarray):
         self.position += np.append(movement_vector, 0)
@@ -233,7 +230,6 @@ Or is it related to entropy? The [Second Law of Thermodynamics](https://en.wikip
 
     def quote(self):
         return r"""
-    # SimpleTime
     _The distinction between the past, present and future is only a stubbornly persistent illusion._
     -- Albert Einstein
     """
@@ -480,6 +476,219 @@ This geometry is non-Euclidean. On a sphere, the sum of angles in a triangle is 
             self.position = save_position
 
 
+
+# AI generated, human checked
+class UnitCircle(Level):
+    """
+    A level where the player stays on the unit circle in the plane.
+    The position is a 2D point on the circle, but movement is a single scalar.
+    A movement of 1 means moving by one radian along the circle.
+    """
+    def __init__(self):
+        self.theta = 0.0
+        self.dim = 2
+        self.dim_move = 1
+        self.position = np.array([1.0, 0.0])
+        self.known_points = {}
+
+    def _update_position(self):
+        self.position[:] = np.array([np.cos(self.theta), np.sin(self.theta)])
+
+    def _normalize_theta(self):
+        self.theta = self.theta % (2 * np.pi)
+
+    def restart(self):
+        self.theta = 0.0
+        self._update_position()
+
+    def description(self):
+        return """In this level, the `model` takes a 2-dimensional position, and a 1-dimensional movement vector. It should output the new, 2-dimensional position.
+
+`model` should have type `model(position: Tuple[float, float], movement: Tuple[float]) -> Tuple[float, float]`"""
+
+    def solution_description(self):
+        return """This level represents motion along a unit circle in the plane.
+
+A possible solution is:
+```python
+def model(position, movement):
+    import math
+
+    theta = math.atan2(position[1], position[0])
+    theta = (theta + movement[0]) % (2 * math.pi)
+    return (math.cos(theta), math.sin(theta))
+```
+"""
+
+    def quote(self):
+        return r"""_Going round and round!"""
+
+    def move(self, movement_coords: np.ndarray):
+        movement_coords = np.array(movement_coords)
+        if movement_coords.shape != (1,):
+            raise ValueError("movement vector must have shape (1,) for UnitCircle")
+        self.theta += float(movement_coords[0])
+        self._normalize_theta()
+        self._update_position()
+
+    def save_point(self, name: str):
+        self.known_points[name] = self.position.copy()
+
+    def measure_angle(self, left_point: str, right_point: str) -> float:
+        a = self.known_points[left_point] - self.position
+        b = self.known_points[right_point] - self.position
+        return angle_between(a, b)
+
+    def measure_length(self, other_point: str) -> float:
+        cur = self.position
+        oth = self.known_points[other_point]
+        dot = np.dot(cur, oth)
+        sigma = np.arccos(np.clip(dot, -1.0, 1.0))
+        return sigma
+
+    def check(self, model):
+        for _ in range(100):
+            theta = np.random.uniform(0, 2 * np.pi)
+            pos = np.array([np.cos(theta), np.sin(theta)])
+            dtheta = np.random.uniform(-2 * np.pi, 2 * np.pi)
+            expected_theta = (theta + dtheta) % (2 * np.pi)
+            expected = np.array([np.cos(expected_theta), np.sin(expected_theta)])
+
+            try:
+                out = model(tuple(pos), (dtheta,))
+            except Exception:
+                return False
+            if not isinstance(out, (list, tuple)) or len(out) != 2:
+                return False
+            out_pos = np.array(out, dtype=float)
+            if not np.allclose(out_pos, expected, atol=1e-5):
+                return False
+        return True
+
+
+# AI generated, human checked
+class UnitSphere(Level):
+    """
+    A level where the player stays on the unit sphere in 3D.
+    The position is a 3D point on the sphere, and movement is a 2D vector of radians.
+    The first value changes the azimuth and the second the polar angle.
+    """
+    def __init__(self):
+        self.theta = 0.0
+        self.phi = np.pi / 2.0
+        self.dim = 3
+        self.dim_move = 2
+        self.position = self._cartesian(self.theta, self.phi)
+        self.known_points = {}
+
+    def _cartesian(self, theta: float, phi: float) -> np.ndarray:
+        return np.array([
+            np.sin(phi) * np.cos(theta),
+            np.sin(phi) * np.sin(theta),
+            np.cos(phi)
+        ])
+
+    def _normalize_angles(self, theta: float, phi: float):
+        theta = theta % (2 * np.pi)
+        while phi < 0 or phi > np.pi:
+            if phi < 0:
+                phi = -phi
+                theta += np.pi
+            elif phi > np.pi:
+                phi = 2 * np.pi - phi
+                theta += np.pi
+        return theta % (2 * np.pi), phi
+
+    def _update_position(self):
+        self.position[:] = self._cartesian(self.theta, self.phi)
+
+    def restart(self):
+        self.theta = 0.0
+        self.phi = np.pi / 2.0
+        self._update_position()
+
+    def description(self):
+        return """In this level, the `model` takes a 3-dimensional position, and a 2-dimensional movement vector. It should output the new, 3-dimensional position.
+
+`model` should have type `model(position: Tuple[float, float, float], movement: Tuple[float, float]) -> Tuple[float, float, float]`"""
+
+    def solution_description(self):
+        return """This level represents motion on a unit sphere in 3D.
+
+A possible solution is:
+```python
+def model(position, movement):
+    import math
+
+    theta = math.atan2(position[1], position[0])
+    phi = math.acos(position[2])
+    theta = (theta + movement[0]) % (2 * math.pi)
+    phi = phi + movement[1]
+    while phi < 0 or phi > math.pi:
+        if phi < 0:
+            phi = -phi
+            theta += math.pi
+        elif phi > math.pi:
+            phi = 2 * math.pi - phi
+            theta += math.pi
+    theta = theta % (2 * math.pi)
+    return (math.sin(phi) * math.cos(theta), math.sin(phi) * math.sin(theta), math.cos(phi))
+```
+"""
+
+    def quote(self):
+        return r"""_Ok, I'm getting dizzy..._"""
+
+    def move(self, movement_coords: np.ndarray):
+        movement_coords = np.array(movement_coords)
+        if movement_coords.shape != (2,):
+            raise ValueError("movement vector must have shape (2,) for UnitSphere")
+        self.theta, self.phi = self._normalize_angles(
+            self.theta + float(movement_coords[0]),
+            self.phi + float(movement_coords[1])
+        )
+        self._update_position()
+
+    def save_point(self, name: str):
+        self.known_points[name] = self.position.copy()
+
+    def measure_angle(self, left_point: str, right_point: str) -> float:
+        a = self.known_points[left_point] - self.position
+        b = self.known_points[right_point] - self.position
+        return angle_between(a, b)
+
+    def measure_length(self, other_point: str) -> float:
+        cur = self.position
+        oth = self.known_points[other_point]
+        dot = np.dot(cur, oth)
+        sigma = np.arccos(np.clip(dot, -1.0, 1.0))
+        return sigma
+
+    def check(self, model):
+        for _ in range(100):
+            theta = np.random.uniform(0, 2 * np.pi)
+            phi = np.random.uniform(0, np.pi)
+            pos = tuple(self._cartesian(theta, phi))
+            dtheta = np.random.uniform(-np.pi, np.pi)
+            dphi = np.random.uniform(-np.pi / 2, np.pi / 2)
+            expected_theta, expected_phi = self._normalize_angles(
+                theta + dtheta,
+                phi + dphi
+            )
+            expected = np.array(self._cartesian(expected_theta, expected_phi))
+
+            try:
+                out = model(pos, (dtheta, dphi))
+            except Exception:
+                return False
+            if not isinstance(out, (list, tuple)) or len(out) != 3:
+                return False
+            out_pos = np.array(out, dtype=float)
+            if not np.allclose(out_pos, expected, atol=1e-5):
+                return False
+        return True
+
+
 import random
 
 class EverythingRandom(Euclidean):
@@ -626,7 +835,7 @@ class NonUniqueODE(Level):
     def description(self):
         return """In this level, the `model` takes only a 1-dimensional position, representing the y coordinate, and outputs a scalar. Your task is to find the universal law governing this space.
 
-`model` should have type model(y: float) -> float
+`model` should have type `model(y: float) -> float`
 
 HINT: restart the world, see what changes, and what doesn't!"""
 

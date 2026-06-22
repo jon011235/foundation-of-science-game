@@ -3,7 +3,7 @@
 
 # The main technical question for me right now whether it would be possible to open a python REPL with the context of the given level so that it can be explored automatically
 from terminal_interface import CLI
-from game_backend import Euclidean, Elevator, SimpleTime, Spherical, NonUniqueODE
+from game_backend import Euclidean, Elevator, SimpleTime, Spherical, UnitCircle, UnitSphere, NonUniqueODE
 from smt_backend import ElevatorSMTWrapper
 
 # TODO for wintercamp: In German + in Grad nicht in rad
@@ -30,7 +30,16 @@ print("What concept in 'normal' physics is represented here?")
 cli = CLI(SimpleTime())
 cli.start()
 
+# Circle
+print("This level is a unit circle: you start at (1,0) and move by radians along the circle.")
+cli = CLI(UnitCircle())
+cli.start()
+
 # Sphere
+print("This level is a unit sphere: you start at (1,0,0) and move by radians along the surface.")
+cli = CLI(UnitSphere())
+cli.start()
+
 print("The ancient Greeks had a lot of nice geometry, but let's try something newer")
 cli = CLI(Spherical)
 cli.start()

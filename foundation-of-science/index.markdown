@@ -97,6 +97,20 @@ _Start here. Simple Introduction challenges._
 _Requires knowledge of trigonometry (sin, cos) and exponentials._
 
 <div class="level-grid">
+    <a href="marimo/game_interface.html?level=UnitCircle" class="level-card">
+        <span class="level-name">Unit Circle</span>
+        <span class="level-meta">Round</span>
+    </a>
+</div>
+
+<div class="level-grid">
+    <a href="marimo/game_interface.html?level=UnitSphere" class="level-card">
+        <span class="level-name">Unit Sphere</span>
+        <span class="level-meta">Extra round</span>
+    </a>
+</div>
+
+<div class="level-grid">
     <a href="marimo/game_interface.html?level=Spherical" class="level-card">
         <span class="level-name">Spherical</span>
         <span class="level-meta">Curved space.</span>
