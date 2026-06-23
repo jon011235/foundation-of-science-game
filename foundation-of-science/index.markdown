@@ -122,11 +122,11 @@ _Logic puzzles disguised as physics._
     </a>
     <a href="marimo/game_interface.html?level=SimpleODE" class="level-card">
         <span class="level-name">Bacteria Growth</span>
-        <span class="level-meta">Does chaos have a pattern?</span>
+        <span class="level-meta">ODEs 1</span>
     </a>
     <a href="marimo/game_interface.html?level=NonUniqueODE" class="level-card">
         <span class="level-name">Weird Constants</span>
-        <span class="level-meta">Does chaos have a pattern?</span>
+        <span class="level-meta">ODEs 2</span>
     </a>
 </div>
 

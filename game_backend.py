@@ -66,10 +66,10 @@ class Euclidean(Level):
     
     def description(self):
         return f"""This level expects the model to take a {self.dim}-sized tuple `position` and a {self.dim_move}-sized tuple `movement_vector`.
-        It should return a {self.dim}-sized tuple with the predicted new position.
-        
-        That is, `model` should have type `model(position: Tuple[int, ...], movement: Tuple[int, ...]) -> Tuple[int, ...]`
-        where the tuples have size {self.dim}, {self.dim_move} and {self.dim} respectively."""
+It should return a {self.dim}-sized tuple with the predicted new position.
+
+That is, `model` should have type `model(position: Tuple[int, ...], movement: Tuple[int, ...]) -> Tuple[int, ...]`
+where the tuples have size {self.dim}, {self.dim_move} and {self.dim} respectively."""
     
     def solution_description(self):
         return """This is just a normal [Euclidean](https://en.wikipedia.org/wiki/Euclidean_geometry) geometry that we are used to, from our normal lives.
@@ -119,7 +119,7 @@ class Elevator(Euclidean):
     def description(self):
         return """In this level, positions are represented by 3-dimensional tuples, while the movement vector by a 2-dimensional tuple. Given the current position and a movement vector, you need to predict the next position.
         
-        `model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
+`model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
 
     def solution_description(self):
         return """The world seems to consist of a simple 2-dimensional plane, until you travel to `(1, 2, 0)`. Here, you get "teleported" to the parallel plane `z = 1`.
@@ -212,7 +212,7 @@ class SimpleTime(Euclidean):
     def description(self):
         return """In this level, positions are represented by 3-dimensional tuples, while the movement vector by a 2-dimensional tuple. Given the current position and a movement vector, you need to predict the next position.
         
-        `model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
+`model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
     
     def solution_description(self):
         return """
@@ -837,8 +837,8 @@ class EverythingRandom(Euclidean):
     def description(self):
         return """This level takes 2 dimensions as a movement and positionvector.
         
-        Your model should also use our magic number, that we will pass to you.
-        So `model` should have type `model(position: Tuple[int, int], movement: Tuple[int, int], magic_number: int) -> Tuple[int, int]`"""
+Your model should also use our magic number, that we will pass to you.
+So `model` should have type `model(position: Tuple[int, int], movement: Tuple[int, int], magic_number: int) -> Tuple[int, int]`"""
     
     def solution_description(self):
         return """
@@ -932,13 +932,12 @@ class SimpleODE(Level):
     def solution_description(self):
         return """Nature is full of situations where it is extremely... natural to express a system in terms of how it _changes_ based on current conditions. And it is often very difficult to find closed form solutions to these systems (see the three body problem). Differential equations are a tool often used to model such instances.
 
-        You have probably noticed that the curve represents the graph of $y = 2 e^x$. This is a fine description, but in a way it misses the deeper meaning of exponential growth.
-        
-        We could describe the situation in a different way: we have a bacteria culture in a Petri dish, initially of size 2. We also know that the speed at which the population size increases at some moment depends precisely on the population size at that moment. This naturally leads us to the model $p(0) = 2$ and $\\frac{dp}{dt} = p$ (where $p$ is the population). Thus, the expected solution is
-        ```
-        def model(p): return p
-        ```
-        """
+You have probably noticed that the curve represents the graph of $y = 2 e^x$. This is a fine description, but in a way it misses the deeper meaning of exponential growth.
+
+We could describe the situation in a different way: we have a bacteria culture in a Petri dish, initially of size 2. We also know that the speed at which the population size increases at some moment depends precisely on the population size at that moment. This naturally leads us to the model $p(0) = 2$ and $\\frac{dp}{dt} = p$ (where $p$ is the population). Thus, the expected solution is
+```
+def model(p): return p
+```"""
 
 
     def y(self):
@@ -1027,21 +1026,18 @@ class NonUniqueODE(Level):
     def solution_description(self):
         return """As exemplified in the level "Bacteria growth", differential equations can often be used to model real-world systems. Instead of specifying the behaviour of the system at all points in time/space, we specify how the systems changes based on current conditions. The literal geometry of our universe is in fact described by a system of partial differential equations (the Einstein field equations). Instead of providing a global structure, the field equaitons tell us how spacetime curves at a point, given its surroundings.
 
-        But what happens when multiple behaviours correspond to one set of laws? When differential equations have multiple solutions. For instance, when Newtonian mechanics predicts a system can behave in a number of ways... non-deterministically ([Norton's Dome](https://sites.pitt.edu/~jdnorton/papers/003004.pdf)).
+But what happens when multiple behaviours correspond to one set of laws? When differential equations have multiple solutions. For instance, when Newtonian mechanics predicts a system can behave in a number of ways... non-deterministically ([Norton's Dome](https://sites.pitt.edu/~jdnorton/papers/003004.pdf)).
 
-        The solution to this level looks like this:
-        ```
-        def model(y):
-            import numpy as np
-            return 2 * np.sqrt(np.abs(y))
-        ```
+The solution to this level looks like this:
+```
+def model(y):
+    import numpy as np
+    return 2 * np.sqrt(np.abs(y))
+```
 
-        which describes the equation $\\frac{dy}{dx} = 2 |y|^{1/2}$.
+which describes the equation $\\frac{dy}{dx} = 2 |y|^{1/2}$.
 
-        Besides the trivial solution y(x) = 0, there is an infinite family of solutions, of the form: $y(x) = -(x - A)^2$, if $x < A$, $y(x) = 0$, if $A \le x \le B$, and $y(x) = (x - B)^2$, if $x > B$, where $A$, $B$ are constants with $A \le 0 \le B$ ([Desmos graph](https://www.desmos.com/calculator/b0hbytghwr)). $A$ and $B$ are akin to fundamental physics constants in our universe: they cannot be "justified", simply measured.
-        
-        The constants $A$ and $B$
-        """
+Besides the trivial solution y(x) = 0, there is an infinite family of solutions, of the form: $y(x) = -(x - A)^2$, if $x < A$, $y(x) = 0$, if $A \le x \le B$, and $y(x) = (x - B)^2$, if $x > B$, where $A$, $B$ are constants with $A \le 0 \le B$ ([Desmos graph](https://www.desmos.com/calculator/b0hbytghwr)). $A$ and $B$ are akin to fundamental physics constants in our universe: they cannot be "justified", simply measured."""
 
 
     def y(self):
