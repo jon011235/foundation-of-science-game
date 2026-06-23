@@ -258,8 +258,9 @@ def _(get_history, get_lvl, np):
     lvl3 = get_lvl()
     history = get_history()
 
-    def get_dynamic_range(value):
-        range = (abs(value)//3+1)*3
+    def get_dynamic_range(pos):
+        max_val = max(abs(max(pos)), abs(min(pos)))
+        range = (abs(max_val)//4+1)*4
         return [-range, range]
 
     def create_plot(lvl, history):
@@ -271,7 +272,7 @@ def _(get_history, get_lvl, np):
         fig = go.Figure()
 
         # Determine axis ranges based on current position
-        range = get_dynamic_range(max(pos))
+        range = get_dynamic_range(pos)
 
         # Plot history
         for hist_pts_dict in history:

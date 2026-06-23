@@ -208,13 +208,11 @@ class SimpleTime(Euclidean):
     def __init__(self):
         super().__init__()
         self.dim_move = 2
-    
+
     def description(self):
-        return """This level takes 2 dimensions as a movementvector (tuple) and
-        expects the model to take a 3 dimensional `position` tuple and a 2 dimensional `movement_vector` tuple.
-        It should return a 3 dimensional tuple with the predicted new position
+        return """In this level, positions are represented by 3-dimensional tuples, while the movement vector by a 2-dimensional tuple. Given the current position and a movement vector, you need to predict the next position.
         
-        So `model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
+        `model` should have type `model(position: Tuple[int, int, int], movement: Tuple[int, int]) -> Tuple[int, int, int]`"""
     
     def solution_description(self):
         return """
@@ -267,15 +265,15 @@ Or is it related to entropy? The [Second Law of Thermodynamics](https://en.wikip
         finally:
             self.position = save_position
 
+# DEPRECATED
 # As you can see: AI generated
-
 class Spherical(Level):
     """
     A level where the player moves on a closed surface.  The implementation
     works with 3‑dimensional spherical coordinates (θ, φ, r) internally, but the
     description does **not** reveal the geometry.
     """
-    position = [0.0,0.0]
+    position = [0.0, 0.0]
 
     # ------------------------------------------------------------------ #
     # Construction – fixed to a 3‑D sphere (dim = 3)
@@ -304,32 +302,29 @@ class Spherical(Level):
             np.cos(phi)
         ])
 
-    def _normalize_angles(self):
-        """Wrap θ to [0,2π) and keep φ inside [0,π] (reflect at the poles)."""
-        self.position[0] = self.position[0] % (2 * np.pi)
-
-        # reflect φ when it leaves the [0,π] interval
-        while self.position[1] < 0 or self.position[1] > np.pi:
-            if self.position[1] < 0:
-                self.position[1] = -self.position[1]
-                self.position[0] += np.pi          # crossing the south pole flips azimuth
-            elif self.position[1] > np.pi:
-                self.position[1] = 2 * np.pi - self.position[1]
-                self.position[0] += np.pi          # crossing the north pole flips azimuth
-        self._normalize_angles() if (self.position[1] < 0 or self.position[1] > np.pi) else None
+    def _normalize_angles(self, theta: float, phi: float):
+        """Normalize angles to [0,2π) × [0,π], handling pole reflections."""
+        theta = theta % (2 * np.pi)
+        while phi < 0 or phi > np.pi:
+            if phi < 0:
+                phi = -phi
+                theta += np.pi
+            elif phi > np.pi:
+                phi = 2 * np.pi - phi
+                theta += np.pi
+        return theta % (2 * np.pi), phi
 
     # ------------------------------------------------------------------ #
     # Public API required by the framework
     # ------------------------------------------------------------------ #
     def description(self):
-        return """This level takes 3 dimensions as a movementvector (tuple) and
-        expects the model to take a 2 dimensional `position` tuple and a 2 dimensional `movement_vector` tuple.
-        It should return a 3 dimensional tuple with the predicted new position
+        return """In this level, positions and movements vectors are represented by 2-dimensional tuples. Given the current position and a movement vector, you need to predict the next position.
         
-        So `model` should have type `model(position: Tuple[float, float, float], movement: Tuple[float, float]) -> Tuple[float, float, float]`"""
+        `model` should have type `model(position: Tuple[float, float], movement: Tuple[float, float]) -> Tuple[float, float]`"""
+    
 
     def solution_description(self):
-        return """This level represents movement on a [Sphere](https://en.wikipedia.org/wiki/Sphere), using spherical coordinates (azimuth, polar angle, radius).
+        return f"""This level represents movement on a [Sphere](https://en.wikipedia.org/wiki/Sphere), using spherical coordinates (azimuth, polar angle, radius) (in our case, the radius is fixed to {self.r}).
 
 A possible solution is:
 ```python
@@ -385,7 +380,7 @@ This geometry is non-Euclidean. On a sphere, the sum of angles in a triangle is 
         dtheta, dphi = movement_coords
         self.position[0] += dtheta
         self.position[1]   += dphi
-        self._normalize_angles()
+        self.position[0], self.position[1] = self._normalize_angles(self.position[0], self.position[1])
 
     def save_point(self, name: str):
         """Remember the current spherical coordinates under `name`."""
@@ -430,56 +425,34 @@ This geometry is non-Euclidean. On a sphere, the sum of angles in a triangle is 
     def check(self, model):
         """
         Randomly generate 100 positions (θ, φ) and movement vectors (Δθ, Δφ).
-        For each trial:
-          1. Build the position tuple   → (θ, φ, r)
-          2. Build the movement tuple   → (Δθ, Δφ)
-          3. Compute the expected new spherical coordinates
-             using the same logic as `move`.
-          4. Call the model and verify:
-                * it returns a tuple of length 3,
-                * the radius component equals `self.r` (within tolerance),
-                * the returned angles match the expected ones (tolerance 1e‑5).
         """
-        save_position = self.position
-        try:
-            for _ in range(100):
-                # ----- random position -----
-                theta = np.random.uniform(0, 2 * np.pi)
-                phi   = np.random.uniform(0, np.pi)
-                pos_tuple = (theta, phi, self.r)
+        for _ in range(100):
+            theta = np.random.uniform(0, 2 * np.pi)
+            phi = np.random.uniform(0, np.pi)
+            pos_tuple = (theta, phi)
 
-                # ----- random movement (Δθ, Δφ) -----
-                dtheta = np.random.uniform(-np.pi, np.pi)          # up to half‑circumference
-                dphi   = np.random.uniform(-np.pi / 2, np.pi / 2)   # avoid jumping over both poles at once
-                mov_tuple = (dtheta, dphi)
+            dtheta = np.random.uniform(-np.pi, np.pi)
+            dphi = np.random.uniform(-np.pi / 2, np.pi / 2)
+            mov_tuple = (dtheta, dphi)
 
-                # ----- expected new state -----
-                # copy current angles so the level isn’t polluted for the next loop
-                self.position[0], self.position[1] = theta, phi
-                self.move(np.array([dtheta, dphi]))
-                expected = (self.position[0], self.position[1], self.r)
+            # Compute expected using pure normalization function
+            expected_theta, expected_phi = self._normalize_angles(
+                theta + dtheta, phi + dphi
+            )
 
-                # ----- model output -----
-                try:
-                    out = model(pos_tuple, mov_tuple)
-                except Exception:
-                    return False
+            try:
+                out = model(pos_tuple, mov_tuple)
+            except Exception:
+                return False
 
-                # ----- validation -----
-                if not isinstance(out, (list, tuple)) or len(out) != 3:
-                    return False
-                out_theta, out_phi, out_r = out
-                if not np.isclose(out_r, self.r, atol=1e-5):
-                    return False
-                if not np.isclose(out_theta % (2*np.pi), expected[0] % (2*np.pi), atol=1e-5):
-                    return False
-                if not np.isclose(out_phi, expected[1], atol=1e-5):
-                    return False
-            return True
-        finally:
-            self.position = save_position
-
-
+            if not isinstance(out, (list, tuple)) or len(out) != 2:
+                return False
+            out_theta, out_phi = out
+            if not np.isclose(out_theta, expected_theta, atol=1e-5):
+                return False
+            if not np.isclose(out_phi, expected_phi, atol=1e-5):
+                return False
+        return True
 
 # AI generated, human checked
 class UnitCircle(Level):
@@ -699,6 +672,146 @@ def model(position, movement):
         return True
 
 
+# AI generated, human checked
+class UnitHyperboloid(Level):
+    """
+    A level where the player stays on the unit hyperboloid in 3D (hyperbolic geometry).
+    Uses the hyperboloid model: x² + y² - z² = -1, z > 0.
+    The position is a 3D point on the hyperboloid, and movement is a 2D vector.
+    The first value changes the azimuth θ, and the second changes the hyperbolic radius ρ.
+    """
+    def __init__(self):
+        self.theta = 0.0
+        self.rho = 0.0  # hyperbolic radius from apex (0, 0, 1)
+        self.dim = 3
+        self.dim_move = 2
+        self.position = self._cartesian(self.theta, self.rho)
+        self.known_points = {}
+
+    def _cartesian(self, theta: float, rho: float) -> np.ndarray:
+        """Convert hyperboloid coordinates to Cartesian (x, y, z)."""
+        return np.array([
+            np.sinh(rho) * np.cos(theta),
+            np.sinh(rho) * np.sin(theta),
+            np.cosh(rho)
+        ])
+
+    def _normalize_coords(self, theta: float, rho: float):
+        """Normalize coordinates: θ ∈ [0, 2π), ρ ≥ 0 with reflection at apex."""
+        if rho < 0:
+            rho = -rho
+            theta = theta + np.pi
+        return theta % (2 * np.pi), rho
+
+    def _update_position(self):
+        self.position[:] = self._cartesian(self.theta, self.rho)
+
+    def restart(self):
+        self.theta = 0.0
+        self.rho = 0.0
+        self._update_position()
+
+    def description(self):
+        return """In this level, the `model` takes a 3-dimensional position, and a 2-dimensional movement vector. It should output the new, 3-dimensional position.
+
+`model` should have type `model(position: Tuple[float, float, float], movement: Tuple[float, float]) -> Tuple[float, float, float]`"""
+
+    def solution_description(self):
+        return """This level represents motion on a unit hyperboloid in 3D, which is a model of [hyperbolic geometry](https://en.wikipedia.org/wiki/Hyperbolic_geometry).
+
+The hyperboloid model uses the surface x² + y² - z² = -1 with z > 0. Points are parameterized as:
+- x = sinh(ρ) * cos(θ)
+- y = sinh(ρ) * sin(θ)
+- z = cosh(ρ)
+
+where ρ ≥ 0 is the hyperbolic distance from the apex (0, 0, 1).
+
+A possible solution is:
+```python
+def model(position, movement):
+    import math
+
+    x, y, z = position
+    rho = math.acosh(z)
+    theta = math.atan2(y, x) if rho > 1e-9 else 0.0
+
+    theta = (theta + movement[0]) % (2 * math.pi)
+    rho = rho + movement[1]
+    if rho < 0:
+        rho = -rho
+        theta = (theta + math.pi) % (2 * math.pi)
+
+    return (
+        math.sinh(rho) * math.cos(theta),
+        math.sinh(rho) * math.sin(theta),
+        math.cosh(rho)
+    )
+```
+
+Unlike spherical geometry where parallel lines eventually meet, in hyperbolic geometry parallel lines diverge! The sum of angles in a triangle is less than 180 degrees, and the space has constant negative curvature.
+"""
+
+    def quote(self):
+        return r"""
+    # Unit Hyperboloid
+    _There's always room for more._
+    """
+
+    def move(self, movement_coords: np.ndarray):
+        movement_coords = np.array(movement_coords)
+        if movement_coords.shape != (2,):
+            raise ValueError("movement vector must have shape (2,) for UnitHyperboloid")
+        self.theta, self.rho = self._normalize_coords(
+            self.theta + float(movement_coords[0]),
+            self.rho + float(movement_coords[1])
+        )
+        self._update_position()
+
+    def save_point(self, name: str):
+        self.known_points[name] = self.position.copy()
+
+    def measure_angle(self, left_point: str, right_point: str) -> float:
+        a = self.known_points[left_point] - self.position
+        b = self.known_points[right_point] - self.position
+        return angle_between(a, b)
+
+    def measure_length(self, other_point: str) -> float:
+        """
+        Returns the hyperbolic distance using the Minkowski inner product.
+        For points on the hyperboloid: cosh(d) = -<p, q> where <.,.> is Minkowski.
+        """
+        cur = self.position
+        oth = self.known_points[other_point]
+        # Minkowski inner product: x1*x2 + y1*y2 - z1*z2
+        minkowski = cur[0]*oth[0] + cur[1]*oth[1] - cur[2]*oth[2]
+        # For points on hyperboloid, this equals -cosh(d)
+        return np.arccosh(np.clip(-minkowski, 1.0, None))
+
+    def check(self, model):
+        for _ in range(100):
+            theta = np.random.uniform(0, 2 * np.pi)
+            rho = np.random.uniform(0, 3)  # reasonable range for hyperbolic radius
+            pos = tuple(self._cartesian(theta, rho))
+            dtheta = np.random.uniform(-np.pi, np.pi)
+            drho = np.random.uniform(-1.5, 1.5)
+            expected_theta, expected_rho = self._normalize_coords(
+                theta + dtheta,
+                rho + drho
+            )
+            expected = np.array(self._cartesian(expected_theta, expected_rho))
+
+            try:
+                out = model(pos, (dtheta, drho))
+            except Exception:
+                return False
+            if not isinstance(out, (list, tuple)) or len(out) != 3:
+                return False
+            out_pos = np.array(out, dtype=float)
+            if not np.allclose(out_pos, expected, atol=1e-5):
+                return False
+        return True
+
+
 import random
 
 class EverythingRandom(Euclidean):
@@ -791,6 +904,66 @@ If we repeat experiments where we either can not control all influences or the e
             self.position = save_position
 
 
+class SimpleODE(Level):
+    """
+    The world is a one-dimensional curve embedded in a 2d plane.  The curve is a solution of the ODE:
+    $ dy/dx = y $
+    with the initial condition y(0) = 2.
+    """
+
+    def __init__(self):
+        self.dim = 2
+        self.dim_move = 1
+        self.x = 0.0 # position
+        self.position = np.array([self.x, self.y()])
+
+    def restart(self):
+        self.x = 0.0
+        self.position = np.array([self.x, self.y()])
+    
+    def description(self):
+        return """In this level, the `model` is only given one scalar, representing the `y` coordinate, and outputs a scalar. You will notice the curve along which you can move has a certain shape. Your task is to compute the rate of change of `y` w.r.t. `x`, of this curve.
+
+`model` should have type `model(y: float) -> float`"""
+
+    def quote(self):
+        return r"""# Bacteria Growth"""
+
+    def solution_description(self):
+        return """Nature is full of situations where it is extremely... natural to express a system in terms of how it _changes_ based on current conditions. And it is often very difficult to find closed form solutions to these systems (see the three body problem). Differential equations are a tool often used to model such instances.
+
+        You have probably noticed that the curve represents the graph of $y = 2 e^x$. This is a fine description, but in a way it misses the deeper meaning of exponential growth.
+        
+        We could describe the situation in a different way: we have a bacteria culture in a Petri dish, initially of size 2. We also know that the speed at which the population size increases at some moment depends precisely on the population size at that moment. This naturally leads us to the model $p(0) = 2$ and $\\frac{dp}{dt} = p$ (where $p$ is the population). Thus, the expected solution is
+        ```
+        def model(p): return p
+        ```
+        """
+
+
+    def y(self):
+        return 2 * np.exp(self.x)
+    
+    def move(self, movement_vector: np.array):
+        assert(len(movement_vector) == 1)
+        self.x += movement_vector[0]
+        self.position = np.array([self.x, self.y()])
+    
+    def save_point(self, name: str):
+        self.known_points[name] = self.position.copy()
+
+    def measure_angle(self, left_point: str, right_point: str) -> int:
+        raise Exception("you do not need to measure angles to complete this level")
+
+    def measure_length(self, other_point) -> int:
+        raise Exception("you do not need to measure lengths to complete this level")
+
+    def check(self, model):
+        for y in np.random.uniform(-50, 50, 100):
+            sol = y
+            if not math.isclose(model(y), sol):
+                return False
+        return True
 
 class NonUniqueODE(Level):
     """
@@ -808,7 +981,7 @@ class NonUniqueODE(Level):
     where A, B are constant with A <= 0 <= B.
     Desmos graph: https://www.desmos.com/calculator/b0hbytghwr
 
-    The goal is to showcase _inter-uiverse non-determinism_ (and not intra-universe). A and B are magic constants that change the "shape" of the world (in a predictable, deterministic way), but they nonetheless can be random.
+    The goal is to showcase _inter-universe non-determinism_ (and not intra-universe). A and B are magic constants that change the "shape" of the world (in a predictable, deterministic way), but they nonetheless can be random.
 
     The ideal scenario would be: player restarts the world a few times, maybe saves points along the curve and plots them. Then notices the shape always looks similar and (maybe?) takes the derivative.
 
@@ -840,14 +1013,36 @@ class NonUniqueODE(Level):
         self.B = np.random.randint(0, 10)
         self.x = 0.0
         self.position = np.array([self.x, self.y()])
-        self.known_points = {}
     
     def description(self):
         return """In this level, the `model` takes only a 1-dimensional position, representing the y coordinate, and outputs a scalar. Your task is to find the universal law governing this space.
 
 `model` should have type `model(y: float) -> float`
 
-HINT: restart the world, see what changes, and what doesn't!"""
+*Hint*: restart the world, see what changes, and what doesn't! Having done the level "Bacteria growth" might help you get into the right mindset!"""
+
+    def quote(self):
+        return r"""# Weird Constants"""
+
+    def solution_description(self):
+        return """As exemplified in the level "Bacteria growth", differential equations can often be used to model real-world systems. Instead of specifying the behaviour of the system at all points in time/space, we specify how the systems changes based on current conditions. The literal geometry of our universe is in fact described by a system of partial differential equations (the Einstein field equations). Instead of providing a global structure, the field equaitons tell us how spacetime curves at a point, given its surroundings.
+
+        But what happens when multiple behaviours correspond to one set of laws? When differential equations have multiple solutions. For instance, when Newtonian mechanics predicts a system can behave in a number of ways... non-deterministically ([Norton's Dome](https://sites.pitt.edu/~jdnorton/papers/003004.pdf)).
+
+        The solution to this level looks like this:
+        ```
+        def model(y):
+            import numpy as np
+            return 2 * np.sqrt(np.abs(y))
+        ```
+
+        which describes the equation $\\frac{dy}{dx} = 2 |y|^{1/2}$.
+
+        Besides the trivial solution y(x) = 0, there is an infinite family of solutions, of the form: $y(x) = -(x - A)^2$, if $x < A$, $y(x) = 0$, if $A \le x \le B$, and $y(x) = (x - B)^2$, if $x > B$, where $A$, $B$ are constants with $A \le 0 \le B$ ([Desmos graph](https://www.desmos.com/calculator/b0hbytghwr)). $A$ and $B$ are akin to fundamental physics constants in our universe: they cannot be "justified", simply measured.
+        
+        The constants $A$ and $B$
+        """
+
 
     def y(self):
         if self.x < self.A: return -(self.x - self.A)**2

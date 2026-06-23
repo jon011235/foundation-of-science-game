@@ -105,10 +105,10 @@ _Requires knowledge of trigonometry (sin, cos) and exponentials._
         <span class="level-name">Unit Sphere</span>
         <span class="level-meta">Extra round</span>
     </a>
-    <a href="marimo/game_interface.html?level=Spherical" class="level-card">
+    <!-- <a href="marimo/game_interface.html?level=Spherical" class="level-card">
         <span class="level-name">Spherical</span>
         <span class="level-meta">Curved space</span>
-    </a>
+    </a> -->
 </div>
 
 ### 🟣 Puzzle Levels
@@ -118,6 +118,14 @@ _Logic puzzles disguised as physics._
 <div class="level-grid">
     <a href="marimo/game_interface.html?level=EverythingRandom" class="level-card">
         <span class="level-name">Everything Random</span>
+        <span class="level-meta">Does chaos have a pattern?</span>
+    </a>
+    <a href="marimo/game_interface.html?level=SimpleODE" class="level-card">
+        <span class="level-name">Bacteria Growth</span>
+        <span class="level-meta">Does chaos have a pattern?</span>
+    </a>
+    <a href="marimo/game_interface.html?level=NonUniqueODE" class="level-card">
+        <span class="level-name">Weird Constants</span>
         <span class="level-meta">Does chaos have a pattern?</span>
     </a>
 </div>
