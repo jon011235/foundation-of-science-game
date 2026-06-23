@@ -1060,8 +1060,7 @@ Besides the trivial solution y(x) = 0, there is an infinite family of solutions,
         raise Exception("you do not need to measure lengths to complete this level")
 
     def check(self, model):
-        for i in range(100):
-            y = np.random.randint(-50, 50, 1)
+        for y in np.random.uniform(-50, 50, 100):
             sol = 2 * np.sqrt(np.abs(y))
             if not math.isclose(model(y), sol):
                 return False
