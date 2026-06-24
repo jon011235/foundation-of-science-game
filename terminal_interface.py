@@ -80,6 +80,8 @@ class CLI:
   plot                 - plot visited positions (2D or 3D depending on dimension)
   check PATH           - load model from PATH (Python file with function model(position, movement))
                          and run level.check(model)
+  checksmt PATH        - load model from PATH (Python file with function model(position, movement))
+                         and check solution using the Z3 SMT solver
   help                 - show this message
   exit | quit          - quit""")
         print(self.level.description())
@@ -218,8 +220,8 @@ class CLI:
             self.success = True
         else:
             print("model check result: False")
-            # TODO: pretty print `cntex` for extra hint
-            # print(cntex)
+            if len(args) >= 2 and args[1] == "-":
+                print(cntex)
             self.success = False
 
 

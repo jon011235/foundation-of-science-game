@@ -16,21 +16,21 @@ print("At the beginning of each level (or using help) you will be given a functi
 print()
 print("BACKGROUND: This is also where this game deviates from actual science: There you have no way to verify the model against the ground truth, so one can never be sure whether the model is actually correct. But more on this shortly")
 
-# Euclidean Level
-cli = CLI(Euclidean())
-cli.start()
+# # Euclidean Level
+# cli = CLI(Euclidean())
+# cli.start()
 
 print("Well done! Please give us feedback on this projects github game and write some fun levels for others to play")
 # Elevator Level
 cli = CLI(ElevatorSMTWrapper())
 cli.start()
 
-# time level
-print("What concept in 'normal' physics is represented here?")
-cli = CLI(SimpleTime())
-cli.start()
+# # time level
+# print("What concept in 'normal' physics is represented here?")
+# cli = CLI(SimpleTime())
+# cli.start()
 
-# Sphere
-print("The ancient Greeks had a lot of nice geometry, but let's try something newer")
-cli = CLI(Spherical())
-cli.start()
+# # Sphere
+# print("The ancient Greeks had a lot of nice geometry, but let's try something newer")
+# cli = CLI(Spherical())
+# cli.start()
