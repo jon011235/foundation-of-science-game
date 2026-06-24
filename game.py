@@ -17,27 +17,27 @@ print()
 print("BACKGROUND: This is also where this game deviates from actual science: There you have no way to verify the model against the ground truth, so one can never be sure whether the model is actually correct. But more on this shortly")
 
 # Euclidean Level
-cli = CLI(Euclidean())
+cli = CLI(Euclidean)
 cli.start()
 
 print("Well done! Please give us feedback on this projects github game and write some fun levels for others to play")
 # Elevator Level
-cli = CLI(ElevatorSMTWrapper())
+# cli = CLI(ElevatorSMTWrapper)
 cli.start()
 
 # time level
 print("What concept in 'normal' physics is represented here?")
-cli = CLI(SimpleTime())
+cli = CLI(SimpleTime)
 cli.start()
 
 # Circle
 print("This level is a unit circle: you start at (1,0) and move by radians along the circle.")
-cli = CLI(UnitCircle())
+cli = CLI(UnitCircle)
 cli.start()
 
 # Sphere
 print("This level is a unit sphere: you start at (1,0,0) and move by radians along the surface.")
-cli = CLI(UnitSphere())
+cli = CLI(UnitSphere)
 cli.start()
 
 print("The ancient Greeks had a lot of nice geometry, but let's try something newer")
@@ -45,5 +45,5 @@ cli = CLI(Spherical)
 cli.start()
 
 # Non determinism Level
-cli = CLI(NonUniqueODE())
+cli = CLI(NonUniqueODE)
 cli.start()

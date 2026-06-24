@@ -176,14 +176,14 @@ def _(currentLevel, get_history, get_lvl, mo, save_name, set_history, set_lvl):
         for past_pts in hist:
             pts = pts | past_pts
         curr_lvl = currentLevel()
-        curr_lvl.known_points = pts
+        curr_lvl.known_points = curr_lvl.known_points | pts
         set_lvl(curr_lvl)
 
     def reset_plot_click(value):
+        set_history([])
         curr_lvl = get_lvl()
         curr_lvl.known_points = dict()
         set_lvl(curr_lvl)
-        set_history([])
 
     move_btn = mo.ui.button(label="Move", on_click=move_btn_click)
     save_btn = mo.ui.button(label="Save", on_click=save_btn_click)
@@ -255,8 +255,6 @@ def _(
 @app.cell(hide_code=True)
 def _(get_history, get_lvl, np):
     import plotly.graph_objects as go
-    lvl3 = get_lvl()
-    history = get_history()
 
     def get_dynamic_range(pos):
         max_val = max(abs(max(pos)), abs(min(pos)))
@@ -349,7 +347,7 @@ def _(get_history, get_lvl, np):
         else:
             fig = go.Figure()
         return fig
-    create_plot(lvl3, history)
+    create_plot(get_lvl(), get_history())
     return
 
 

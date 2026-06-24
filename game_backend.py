@@ -26,13 +26,8 @@ def nparr_to_tuple(arr):
 # ==============================================================
 
 class Level():
-    known_points = {}
-
     def __init__(self):
-        raise NotImplemented
-
-    def restart(self):
-        raise Exception("This level cannot be restarted")
+        self.known_points = {}
     
     def description(self): # prints a description of the level,
         # in particular how many dimensions and how the context of the model looks like
@@ -474,10 +469,6 @@ class UnitCircle(Level):
     def _normalize_theta(self):
         self.theta = self.theta % (2 * np.pi)
 
-    def restart(self):
-        self.theta = 0.0
-        self._update_position()
-
     def description(self):
         return """In this level, the `model` takes a 2-dimensional position, and a 1-dimensional movement vector. It should output the new, 2-dimensional position.
 
@@ -581,11 +572,6 @@ class UnitSphere(Level):
 
     def _update_position(self):
         self.position[:] = self._cartesian(self.theta, self.phi)
-
-    def restart(self):
-        self.theta = 0.0
-        self.phi = np.pi / 2.0
-        self._update_position()
 
     def description(self):
         return """In this level, the `model` takes a 3-dimensional position, and a 2-dimensional movement vector. It should output the new, 3-dimensional position.
@@ -705,11 +691,6 @@ class UnitHyperboloid(Level):
 
     def _update_position(self):
         self.position[:] = self._cartesian(self.theta, self.rho)
-
-    def restart(self):
-        self.theta = 0.0
-        self.rho = 0.0
-        self._update_position()
 
     def description(self):
         return """In this level, the `model` takes a 3-dimensional position, and a 2-dimensional movement vector. It should output the new, 3-dimensional position.
@@ -912,15 +893,12 @@ class SimpleODE(Level):
     """
 
     def __init__(self):
+        super().__init__()
         self.dim = 2
         self.dim_move = 1
         self.x = 0.0 # position
         self.position = np.array([self.x, self.y()])
 
-    def restart(self):
-        self.x = 0.0
-        self.position = np.array([self.x, self.y()])
-    
     def description(self):
         return """In this level, the `model` is only given one scalar, representing the `y` coordinate, and outputs a scalar. You will notice the curve along which you can move has a certain shape. Your task is to compute the rate of change of `y` w.r.t. `x`, of this curve.
 
@@ -1000,19 +978,14 @@ class NonUniqueODE(Level):
     """
 
     def __init__(self):
+        super().__init__()
         self.dim = 2
         self.dim_move = 1
         self.x = 0.0 # position
-        self.A = -2
-        self.B = 1
-        self.position = np.array([self.x, self.y()])
-
-    def restart(self):
         self.A = np.random.randint(-10, 0)
         self.B = np.random.randint(0, 10)
-        self.x = 0.0
         self.position = np.array([self.x, self.y()])
-    
+
     def description(self):
         return """In this level, the `model` takes only a 1-dimensional position, representing the y coordinate, and outputs a scalar. Your task is to find the universal law governing this space.
 

@@ -37,7 +37,8 @@ class CLI:
     success = False # Flag used to stop the interface if a level was mastered
 
     def __init__(self, level):
-        self.level = level
+        self.level_class = level
+        self.level = level()
         self.history = [self.level.position.copy()] # list of numpy positions
 
     def start(self):
@@ -201,10 +202,11 @@ class CLI:
 
     def cmd_restart(self, args):
         try:
-            self.level.restart()
+            self.level = self.level_class()
             print("level restarted")
         except Exception as e:
             print("error restarting the level:", e)
+
     def cmd_checksmt(self, args):
         if not isinstance(self.level, smtb.SMTLevelWrapper):
             print("error running SMT check: this level does not support SMT checking")
