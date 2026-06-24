@@ -116,6 +116,10 @@ _Requires knowledge of trigonometry (sin, cos) and exponentials._
 _Logic puzzles disguised as physics._
 
 <div class="level-grid">
+    <a href="/marimo/game_blind.html?level=GoingInBlind" class="level-card">
+        <span class="level-name">Going in Blind</span>
+        <span class="level-meta"></span>
+    </a>
     <a href="marimo/game_interface.html?level=EverythingRandom" class="level-card">
         <span class="level-name">Everything Random</span>
         <span class="level-meta">Does chaos have a pattern?</span>
