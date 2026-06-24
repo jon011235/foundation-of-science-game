@@ -536,6 +536,44 @@ def model(position, movement):
                 return False
         return True
 
+class GoingInBlind(UnitCircle):
+    """
+    A level where the player stays on the unit circle in the plane. The user does not have access to the position, only to measurements.
+    """
+    def __init__(self):
+        super().__init__()
+        self.known_points = {"o" : np.array([0.0, 0.0])}
+
+    def description(self):
+        return """In this level, the `model` takes a 2-dimensional position, and a 1-dimensional movement vector. It should output the new, 2-dimensional position.
+
+`model` should have type `model(position: Tuple[float, float], movement: Tuple[float]) -> Tuple[float, float]`
+
+*Hint*: check the saved points!"""
+
+    def solution_description(self):
+        return """This level represents motion along a unit circle in the plane. Notice how we can infer information about the world, even if we do not have an absolute position (which we do not, in the real world; any position is relative).
+
+A possible solution is:
+```python
+def model(position, movement):
+    import math
+
+    theta = math.atan2(position[1], position[0])
+    theta = (theta + movement[0]) % (2 * math.pi)
+    return (math.cos(theta), math.sin(theta))
+```
+"""
+
+    def quote(self):
+        return r"""
+    # Going in Blind
+    """
+
+    def measure_length(self, other_point: str) -> float:
+        cur = self.position
+        oth = self.known_points[other_point]
+        return float(np.linalg.norm(cur - oth))
 
 # AI generated, human checked
 class UnitSphere(Level):

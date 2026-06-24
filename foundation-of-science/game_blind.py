@@ -17,7 +17,7 @@ def _():
 @app.cell
 def _():
     import numpy as np
-    return (np,)
+    return
 
 
 @app.cell
@@ -79,7 +79,7 @@ def _(custom_code, mo):
         exec(f"currentLevel = gb.{url_params['level']}") 
 
     # import game_backend as gb
-    # currentLevel = gb.UnitSphere
+    # currentLevel = gb.GoingInBlind
     return (currentLevel,)
 
 
@@ -180,10 +180,10 @@ def _(currentLevel, get_history, get_lvl, mo, save_name, set_history, set_lvl):
         set_lvl(curr_lvl)
 
     def reset_plot_click(value):
-        set_history([])
         curr_lvl = get_lvl()
         curr_lvl.known_points = dict()
         set_lvl(curr_lvl)
+        set_history([])
 
     move_btn = mo.ui.button(label="Move", on_click=move_btn_click)
     save_btn = mo.ui.button(label="Save", on_click=save_btn_click)
@@ -202,7 +202,7 @@ def _(mo):
 def _(lvl, mo):
     pos_str = ", ".join([str(x) for x in lvl.position])
     position = mo.md(f"""Current position: `[{pos_str}]`""")
-    return (position,)
+    return
 
 
 @app.cell
@@ -229,7 +229,6 @@ def _(
     mo,
     move_btn,
     move_inputs,
-    position,
     reset_lvl_btn,
     reset_plot_btn,
     save_btn,
@@ -239,115 +238,11 @@ def _(
     save_stack = mo.vstack([save_name, save_btn], align="start")
     reset_stack = mo.vstack([save_name, save_btn, dist_to_pnt_md, reset_lvl_btn, reset_plot_btn], align="start")
 
-    mo.vstack(
-        [
-            position,
-            mo.hstack([
-                mv_stack,
-                reset_stack,
-            ], gap=3)
-        ],
-        align="center"
-    )
-    return
 
-
-@app.cell(hide_code=True)
-def _(get_history, get_lvl, np):
-    import plotly.graph_objects as go
-
-    def get_dynamic_range(pos):
-        max_val = max(abs(max(pos)), abs(min(pos)))
-        range = (abs(max_val)//4+1)*4
-        return [-range, range]
-
-    def create_plot(lvl, history):
-        points_dict = lvl.known_points
-        pts_list = list(points_dict.values()) if points_dict else []
-        names = list(points_dict.keys()) if points_dict else []
-        pos = lvl.position
-
-        fig = go.Figure()
-
-        # Determine axis ranges based on current position
-        range = get_dynamic_range(pos)
-
-        # Plot history
-        for hist_pts_dict in history:
-            h_pts_list = list(hist_pts_dict.values())
-            if not h_pts_list: continue
-            h_pts = np.array(h_pts_list)
-
-            if lvl.dim == 3:
-                fig.add_trace(go.Scatter3d(
-                    x=h_pts[:, 0], y=h_pts[:, 1], z=h_pts[:, 2],
-                    mode='markers',
-                    marker=dict(size=3, color='gray', opacity=0.5),
-                    hoverinfo='skip'
-                ))
-            elif lvl.dim == 2:
-                fig.add_trace(go.Scatter(
-                    x=h_pts[:, 0], y=h_pts[:, 1],
-                    mode='markers',
-                    marker=dict(size=6, color='gray', opacity=0.5),
-                    hoverinfo='skip'
-                ))
-
-        if lvl.dim == 3:
-            if pts_list:
-                pts = np.array(pts_list)
-                fig.add_trace(go.Scatter3d(
-                    x=pts[:, 0], y=pts[:, 1], z=pts[:, 2],
-                    mode='markers+text',
-                    text=names,
-                    marker=dict(size=4, color='blue'),
-                    textposition="top center"
-                ))
-            fig.add_trace(go.Scatter3d(
-                x=[pos[0]], y=[pos[1]], z=[pos[2]],
-                mode='markers',
-                marker=dict(size=5, color='red'),
-            ))
-            fig.update_layout(
-                scene=dict(
-                    xaxis=dict(range=range, autorange=False),
-                    yaxis=dict(range=range, autorange=False),
-                    zaxis=dict(range=range, autorange=False),
-                    aspectmode='manual',
-                    aspectratio=dict(x=1, y=1, z=1),
-                    camera=dict(eye=dict(x=1.5, y=1, z=.5))
-                ),
-                uirevision='constant_value',
-                margin=dict(l=0, r=0, b=0, t=0),
-                showlegend=False
-            )
-        elif lvl.dim == 2:
-            if pts_list:
-                pts = np.array(pts_list)
-                fig.add_trace(go.Scatter(
-                    x=pts[:, 0], y=pts[:, 1],
-                    mode='markers+text',
-                    text=names,
-                    marker=dict(size=8, color='blue'),
-                    textposition="top center"
-                ))
-            fig.add_trace(go.Scatter(
-                x=[pos[0]], y=[pos[1]],
-                mode='markers',
-                marker=dict(size=10, color='red'),
-            ))
-            fig.update_layout(
-                xaxis=dict(range=range, autorange=False),
-                yaxis=dict(range=range, autorange=False),
-                uirevision='constant_value',
-                margin=dict(l=0, r=0, b=0, t=0),
-                showlegend=False,
-                yaxis_scaleanchor="x"
-            )
-        else:
-            fig = go.Figure()
-        return fig
-    create_plot(get_lvl(), get_history())
+    mo.hstack([
+        mv_stack,
+        reset_stack,
+    ], gap=3)
     return
 
 
@@ -369,13 +264,15 @@ def _(get_lvl, get_repl_code, mo, set_lvl, set_repl_code, set_repl_output):
     )
 
     class LevelWrapper():
-        def position(self): return get_lvl().position
+        def position(self): return None
 
         def dim(self): return get_lvl().dim
 
         def dim_move(self): return get_lvl().dim_move
 
-        def known_points(self): return {k: tuple(map(float,tuple(v))) for k, v in get_lvl().known_points.items()}
+        # def known_points(self): return {k: tuple(map(float,tuple(v))) for k, v in get_lvl().known_points.items()}
+
+        def known_points(self): return set(get_lvl().known_points.keys())
 
         def move(self, v): get_lvl().move(v)
 

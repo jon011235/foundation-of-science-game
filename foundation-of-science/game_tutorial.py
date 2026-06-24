@@ -4,7 +4,7 @@ A webinterface for simple levels that are 2 or 3 dimensional in movement and pos
 
 import marimo
 
-__generated_with = "0.19.2"
+__generated_with = "0.19.0"
 app = marimo.App()
 
 
@@ -136,7 +136,7 @@ def _(mo):
     _There is no royal road to geometry._ -- Euclid
 
     <a href="https://jon011235.github.io/foundation-of-science-game/">← Go back (all work will be discarded)</a>
-    
+
     This first level will be a walk through the base mechanics of the game.
 
     ### A ~~short~~ philosophical introduction
@@ -527,21 +527,21 @@ def _(TutState, mo, tut_state):
         mo.output.replace(
             mo.md(r"""
             <details><summary>Quick reference</summary>
-             <ul class="acc-list">
-                  <li>Move: <code>lvl.move(movement_vector)</code> (tuple of size given in typesignature in the Description below)</li>
-                  <li>Save current position: <code>lvl.save_point("name")</code></li>
-                  <li>Measure angle: <code>lvl.measure_angle("left","right")</code> (both are saved point names)</li>
-                  <li>Measure length: <code>lvl.measure_length("name")</code> (where "name" is a saved point)</li>
-                  <li>Inspect state:
-                  <ul>
-                      <li><code>lvl.position</code></li>
-                      <li><code>lvl.dim</code></li>
-                      <li><code>lvl.dim_move</code></li>
-                      <li><code>lvl.known_points</code></li>
-                  </ul>
-                  </li>
-                </ul>
-            </details>
+     <ul class="acc-list">
+          <li>Move: <code>lvl.move(movement_vector)</code> (tuple of size given in typesignature in the Description below)</li>
+          <li>Save current position: <code>lvl.save_point("name")</code></li>
+          <li>Measure angle: <code>lvl.measure_angle("left","right")</code> (both are saved point names)</li>
+          <li>Measure length: <code>lvl.measure_length("name")</code> (where "name" is a saved point)</li>
+          <li>Inspect state:
+          <ul>
+              <li><code>lvl.position()</code></li>
+              <li><code>lvl.dim()</code></li>
+              <li><code>lvl.dim_move()</code></li>
+              <li><code>lvl.known_points()</code></li>
+          </ul>
+          </li>
+        </ul>
+    </details>
             """))
     return
 
