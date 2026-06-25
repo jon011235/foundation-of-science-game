@@ -497,7 +497,7 @@ def model(position, movement):
     def move(self, movement_coords: np.ndarray):
         movement_coords = np.array(movement_coords)
         if movement_coords.shape != (1,):
-            raise ValueError("movement vector must have shape (1,) for UnitCircle")
+            raise ValueError("movement vector must have shape (1,)")
         self.theta += float(movement_coords[0])
         self._normalize_theta()
         self._update_position()
