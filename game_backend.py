@@ -31,31 +31,31 @@ class Level():
     
     def description(self): # prints a description of the level,
         # in particular how many dimensions and how the context of the model looks like
-        raise NotImplemented
+        raise NotImplementedError
 
     def solution_description(self):
         # should include the relevant things to notice and model in this level
-        raise NotImplemented
+        raise NotImplementedError
 
     def move(self, movement_vector):
-        raise NotImplemented
+        raise NotImplementedError
 
     def save_point(self, name):
-        raise NotImplemented
+        raise NotImplementedError
     
     def measure_angle(self, left_point, right_point): # measuring the angle between two points and the current position
-        raise NotImplemented
+        raise NotImplementedError
     
     def check(self, model): # odel is a function that given the context (i.e. the position and where to move) and predicts how a state (i.e. the position) changes
-        raise NotImplemented
+        raise NotImplementedError
     
     def quote(self):
-        raise NotImplemented
+        raise NotImplementedError
 
 class Euclidean(Level):
     def __init__(self, dim: int = 3, dim_move: int = 3):
         self.dim = dim
-        self.dim_move = dim
+        self.dim_move = dim_move
         self.position = np.zeros(dim)
         self.known_points = {}
     

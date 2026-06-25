@@ -90,7 +90,7 @@ def _(currentLevel, mo):
     get_history, set_history = mo.state([])
     get_repl_output, set_repl_output = mo.state("")
     get_repl_code, set_repl_code = mo.state(
-        "# lvl.move((1,0,0))\nprint(lvl.position)"
+        "# lvl.move((1,0,0))\nprint(lvl.position())"
     )
     return (
         get_history,
@@ -381,9 +381,9 @@ def _(get_lvl, get_repl_code, mo, set_lvl, set_repl_code, set_repl_output):
 
         def save_point(self, n): get_lvl().save_point(n)
 
-        def measure_length(self, n): get_lvl().measure_length(n)
+        def measure_length(self, n): return get_lvl().measure_length(n)
 
-        def measure_angle(self, a, b): get_lvl().measure_angle(a, b)
+        def measure_angle(self, a, b): return get_lvl().measure_angle(a, b)
 
     def run_repl(value):
         import io
